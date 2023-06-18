@@ -72,3 +72,44 @@ One of the main advantages of macros over functions in Rust is that they are mor
 Macros work through a process called macro expansion, where the macro is expanded to its body code before the code is compiled.
 
 Macros can also be more difficult to write and debug than functions, so they should be used judiciously.
+
+## Control Flow
+
+If statements in rust:
+
+```rust
+let x = 5;
+
+// No parentheses around the condition
+if x == 5 {
+    println!("x is five!");
+} else if x == 6 {
+    println!("x is six!");
+} else {
+    println!("x is not five or six :(");
+}
+```
+
+Loops in rust:
+
+```rust
+let mut x = 0;
+
+// loop is an infinite loop until a break statement is reached
+loop {
+    if x == 5 {
+        break;
+    }
+
+    // Prints 0 through 4
+    println!("{x:?}");
+    x += 1;
+}
+
+// Executes while the condition is true
+while x > 0 {
+    // Prints 5 through 1
+    println!("{x:?}");
+    x -= 1;
+}
+```
