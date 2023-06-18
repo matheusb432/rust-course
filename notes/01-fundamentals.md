@@ -1,5 +1,7 @@
 # Rust Fundamentals
 
+Rust is an expression-based language, this means that most things are evaluated and return some value
+
 ## Data Types
 
 - Memory only stores binary data
@@ -117,7 +119,7 @@ while x > 0 {
 ### Match expressions
 Match expressions are a much more powerful switch statemen
 
-Match expressions must be exhaustive, they should account for every possible result, so if a match is used for controlling an action on an enum value, the compiler will notify whenever the enum is updated and it's handling is not accounted for
+Match expressions must be exhaustive, they should account for every possible result, so if a match is used for controlling an action on an enum value, the compiler throw an error if that is not accounted for
 
 ```rust
 let some_bool = true;
@@ -134,5 +136,73 @@ match some_int {
     3 => println!("Is three"),
     // NOTE _ is the default case
     _ => println!("Is something else"),
+}
+```
+
+## Data Types
+
+### Struct
+A struct (structure) is a type that contain multiple fields to group similar data together, much like an object
+
+It cannot have some pieces of data and not others
+
+```rust
+struct ShippingBox {
+    depth: i32,
+    width: i32,
+    height: i32,
+}
+
+let my_box = ShippingBox {
+    depth: 3,
+    width: 2,
+    height: 5,
+};
+
+println!(my_box.depth) // 3
+```
+
+### Tuples
+A type of record to store data anonymously (unnamed fields) that can be easily destructured into variables
+
+Ideally tuples should have at most 3 values, if more values than that are needed, structs should be used instead
+
+Useful to return pairs of data from functions
+
+```rust
+enum Access {
+    Full,
+}
+
+fn one_two_three() -> (i32, i32, i32) {
+    (1, 2, 3)
+}
+
+let numbers = one_two_three();
+println!("numbers -> {:?}", numbers);
+let (employee, access) = ("John", Access::Full);
+```
+
+### Expressions
+Expression values coalesce to a single point, they can be used for nesting logic
+
+It's also possible to nest expressions, but it should be limited to 2 or 3 levels of nesting so the code doesn't become too complex
+
+```rust
+let my_num = 3;
+// Setting is_lt_5 to the result of the expression
+let is_lt_5 = if my_num < 5 {
+    true
+} else {
+    false
+};
+
+// Equivalent since the ternary expression would be redundant
+let is_lt_5 = my_num < 5;
+
+// Possible to set message to the result of the match expression
+let message = match my_num {
+    1 => "hello",
+    _ => "goodbye",
 }
 ```
