@@ -1,7 +1,4 @@
 fn main() {
-    // :)
-    println!("Hello World!");
-
     let mut x = 0;
 
     println!("loop:");

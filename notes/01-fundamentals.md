@@ -75,7 +75,7 @@ Macros can also be more difficult to write and debug than functions, so they sho
 
 ## Control Flow
 
-If statements in rust:
+### If statements
 
 ```rust
 let x = 5;
@@ -90,7 +90,7 @@ if x == 5 {
 }
 ```
 
-Loops in rust:
+### Loops
 
 ```rust
 let mut x = 0;
@@ -111,5 +111,28 @@ while x > 0 {
     // Prints 5 through 1
     println!("{x:?}");
     x -= 1;
+}
+```
+
+### Match expressions
+Match expressions are a much more powerful switch statemen
+
+Match expressions must be exhaustive, they should account for every possible result, so if a match is used for controlling an action on an enum value, the compiler will notify whenever the enum is updated and it's handling is not accounted for
+
+```rust
+let some_bool = true;
+
+match some_bool {
+    true => println!("Is true"),
+    false => println!("Is false"),
+}
+
+let some_int = 5;
+match some_int {
+    1 => println!("Is one"),
+    2 => println!("Is two"),
+    3 => println!("Is three"),
+    // NOTE _ is the default case
+    _ => println!("Is something else"),
 }
 ```
