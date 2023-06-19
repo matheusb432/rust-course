@@ -117,6 +117,7 @@ while x > 0 {
 ```
 
 ### Match expressions
+
 Match expressions are a much more powerful switch statemen
 
 Match expressions must be exhaustive, they should account for every possible result, so if a match is used for controlling an action on an enum value, the compiler throw an error if that is not accounted for
@@ -141,10 +142,15 @@ match some_int {
 
 ## Data Types
 
+Type annotations are mostly optional within function bodies, they can be explicitly specified using let bindings, but it's usually better to let the compiler infer the types
+
 ### Struct
+
 A struct (structure) is a type that contain multiple fields to group similar data together, much like an object
 
-It cannot have some pieces of data and not others
+It cannot have some pieces of data and not others.
+
+Structs cannot have borrowed `&` data, as they are responsible for cleaning up their data when they are dropped, and they cannot drop data that they don't own.
 
 ```rust
 struct ShippingBox {
@@ -163,6 +169,7 @@ println!(my_box.depth) // 3
 ```
 
 ### Tuples
+
 A type of record to store data anonymously (unnamed fields) that can be easily destructured into variables
 
 Ideally tuples should have at most 3 values, if more values than that are needed, structs should be used instead
@@ -184,6 +191,7 @@ let (employee, access) = ("John", Access::Full);
 ```
 
 ### Expressions
+
 Expression values coalesce to a single point, they can be used for nesting logic
 
 It's also possible to nest expressions, but it should be limited to 2 or 3 levels of nesting so the code doesn't become too complex
@@ -204,5 +212,76 @@ let is_lt_5 = my_num < 5;
 let message = match my_num {
     1 => "hello",
     _ => "goodbye",
+}
+```
+
+### Option
+
+Option is a type that can either be some data of a specified type, or nothing
+
+Is used in scenarios where data may not be required or is unavailable
+
+```rust
+// The option type in the default Rust library
+enum Option<T> {
+    Some(T),
+    None
+}
+```
+
+Examples of structs with Option fields
+
+```rust
+struct Customer {
+    age: Option<i32>,
+    email: String,
+}
+
+let mark = Customer {
+    // Providing the age with Some
+    age: Some(30),
+    email: "example@email.com".to_owned(),
+}
+let becky = Customer {
+    // Even though age is optional, it's still required to be explicitly None
+    age: None,
+    email: "example@email.com".to_owned(),
+}
+
+match becky.age {
+    // Matching on an Option type, the value is extracted from the Some variant
+    Some(age) => println!("Customer age: {age}"),
+    None => println!("Customer age not provided"),
+}
+```
+
+Functions that return optional data:
+
+```rust
+struct GroceryItem {
+    name: String,
+    qty: i32,
+}
+
+fn find_quantity(name: &str) -> Option<i32> {
+    let grocery_list = vec![
+        GroceryItem {
+            name: "bananas".to_owned(),
+            qty: 5,
+        },
+        GroceryItem {
+            name: "apples".to_owned(),
+            qty: 3,
+        },
+    ];
+
+    for item in grocery_list {
+        if item.name == name {
+            // Having an early return with the found value
+            return Some(item.qty);
+        }
+    }
+    // Explicitly returning None if the value is not found
+    None
 }
 ```
