@@ -222,7 +222,7 @@ Option is a type that can either be some data of a specified type, or nothing
 Is used in scenarios where data may not be required or is unavailable
 
 ```rust
-// The option type in the default Rust library
+// The option type in the standard Rust library
 enum Option<T> {
     Some(T),
     None
@@ -283,5 +283,43 @@ fn find_quantity(name: &str) -> Option<i32> {
     }
     // Explicitly returning None if the value is not found
     None
+}
+```
+
+### Result
+
+Result is a type that can either be some data of a specified type (Ok), or an error (Err)
+
+Is used when an action needs to be taken, but has the possibility of failure (e.g. reading a file, HTTP request, etc.)
+
+```rust
+// The result type in the standard Rust library
+enum Result<T, E> {
+    // Ok with the success value of type T
+    Ok(T),
+    // Err with the error of type E
+    Err(E),
+}
+```
+
+Usage of the Result type:
+
+```rust
+fn get_sound(name: &str) -> Result<SoundData, String> {
+    if name == "alert" {
+        // Returning the success value with Ok
+        Ok(SoundData::new("alert")),
+    } else {
+        // Returning the error value with Err
+        Err("Sound not found".to_owned())
+    }
+}
+
+let sound = get_sound("alert");
+
+// Matching on the result type to handle both the error and success cases concisely
+match sound {
+    Ok(_) => println!("Sound data located"),
+    Err(err) => println!("Error: {:?}", err),
 }
 ```
