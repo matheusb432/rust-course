@@ -1,5 +1,7 @@
 # Rust Data Collections
 
+[When to use each collection](https://doc.rust-lang.org/std/collections/index.html#when-should-you-use-which-collection)
+
 ## Impl
 
 Implementations allows you to define methods that operate on instances of a struct or an enum, as well as associated functions that do not operate on an instance but are associated with the type. Additionally, it's used for implementing traits for specific types.
@@ -109,5 +111,41 @@ enum Discount {
     // It's possible to have enums within enums
     Promo(PromoDiscount),
     Custom(String),
+}
+```
+
+## HashMap
+
+A HashMap is a collection that stores key-value pairs, where the key is used to look up the value in an efficient manner.
+
+Similar to a Map in JS.
+
+```rust
+let mut people = HashMap::new();
+people.insert("John", 30);
+people.insert("Becky", 25);
+people.insert("Mark", 40);
+people.insert("Mark", 50); // Overwrites the previous value
+people.remove("Becky");
+
+// Matching on the Result<T> of the get method
+match people.get("John") {
+    Some(age) => println!("John's age: {}", age),
+    None => println!("John not found"),
+}
+
+// .iter() return a key-value tuple on HashMaps
+for (person, age) in people.iter() {
+    println!("{} is {} years old", person, age);
+}
+
+// .keys() returns an iterator of the keys
+for person in people.keys() {
+    println!("Person: {}", person);
+}
+
+// .values() returns an iterator of the values
+for age in people.values() {
+    println!("Age: {}", age);
 }
 ```
