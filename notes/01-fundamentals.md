@@ -1,4 +1,4 @@
-# Rust Fundamentals
+# Rust Fundamentals 🦀
 
 Rust is an expression-based language, this means that most things are evaluated and return some value
 
@@ -18,6 +18,29 @@ By default, variables are immutable. To make a variable mutable, use the `mut` k
 ```rust
 let mut discount_price = 49.99;
 let mut name = "John";
+```
+
+### Constants
+
+Constants are similar to variables, but they are immutable and must be annotated with a type, they must also have a value that can be computed at compile time.
+
+```rust
+const MAX_POINTS: u32 = 100_000;
+
+fn main() {
+    println!("The value of MAX_POINTS is: {}", MAX_POINTS);
+}
+```
+
+Constants are more performant than variables because they are inlined wherever they are used.
+
+### Shadowing
+
+Shadowing lets us transform a variable in a way that is clear, type-safe, and performant. It also helps keep our code concise and self-documenting, reducing the mental overhead of tracking multiple variable names.
+
+```rust
+let spaces = " "; // spaces is a string
+let spaces = spaces.len(); // now spaces is an integer, the length of the original string
 ```
 
 ## Functions
