@@ -23,35 +23,9 @@
 // * The program should be case-insensitive (the user should be able to type
 //   Reboot, reboot, REBOOT, etc.)
 
-const EXIT: &'static str = "exit";
-const HELP: &'static str = "help";
-
-// NOTE Importing the PowerState enum from the power_state module
-use code::power_state::PowerState;
-use std::io;
-
-fn get_input() -> io::Result<String> {
-    let mut buffer = String::new();
-
-    io::stdin().read_line(&mut buffer)?;
-
-    Ok(buffer.trim().to_owned())
-}
-
-// * 1.
-fn input_loop() -> Result<(), io::Error> {
-    loop {
-        println!("Enter a command:");
-        let input = get_input()?;
-
-        match input.as_str() {
-            EXIT => break,
-            HELP => print_help(),
-            input => handle_power_state(input).unwrap_or_else(|err| println!("\nERROR: {err}\n")),
-        }
-    }
-    Ok(())
-}
+use code::input::{input_loop, print_help};
+// NOTE Importing the PowerState enum and constants from the power_state module
+use code::power_state::{PowerState, HIBERNATE, OFF, REBOOT, SHUTDOWN, SLEEP};
 
 fn handle_power_state(input: &str) -> Result<(), String> {
     // NOTE The `?` operator on a Result essentially does optional chaining
@@ -60,25 +34,11 @@ fn handle_power_state(input: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn print_help() {
-    println!(
-        "\nCommands:\n\
-        - off\n\
-        - sleep\n\
-        - reboot\n\
-        - shutdown\n\
-        - hibernate\n\
-        To exit the program:\n\
-        - exit\n\
-        To see the commands again:\n\
-        - help\n"
-    );
-}
-
 fn main() {
-    print_help();
+    let commands = vec![OFF, SLEEP, REBOOT, SHUTDOWN, HIBERNATE];
+    print_help(&commands);
 
-    match input_loop() {
+    match input_loop(handle_power_state, &commands) {
         Ok(_) => {
             println!("Exiting program...");
         }

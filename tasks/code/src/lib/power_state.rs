@@ -1,11 +1,11 @@
 // * a20.rs
 
 // NOTE Setting constants for the power states, more memory efficient than using strings
-const OFF: &'static str = "off";
-const SLEEP: &'static str = "sleep";
-const REBOOT: &'static str = "reboot";
-const SHUTDOWN: &'static str = "shutdown";
-const HIBERNATE: &'static str = "hibernate";
+pub const OFF: &'static str = "off";
+pub const SLEEP: &'static str = "sleep";
+pub const REBOOT: &'static str = "reboot";
+pub const SHUTDOWN: &'static str = "shutdown";
+pub const HIBERNATE: &'static str = "hibernate";
 
 // * 2.
 pub enum PowerState {
