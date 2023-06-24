@@ -1,14 +1,10 @@
 [package]
-name = "code"
+name = "external_crates"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = "0.4.26"
-
-[lib]
-name = "code"
-# NOTE Declaring the main module path
-path = "src/lib/mod.rs"
+# NOTE `cargo add humantime`, or simply adding this line in this file, adds an external dependency to a project
+humantime = "2.1.0"

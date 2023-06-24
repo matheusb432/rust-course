@@ -157,3 +157,38 @@ match some_int {
     _ => println!("Is something else"),
 }
 ```
+
+## Modules
+
+Modules are a way to organize code and control the privacy of paths. A module is a collection of items: functions, structs, traits, impl blocks, and even other modules.
+
+```rust
+mod my_module {
+    // Items in modules default to private visibility
+    fn private_function() {
+        println!("called `my_module::private_function()`");
+    }
+
+    // Use the `pub` modifier to override default visibility.
+    pub fn function() {
+        println!("called `my_module::function()`");
+    }
+
+    // Modules can also be nested
+    pub mod nested {
+        pub fn function() {
+            println!("called `my_module::nested::function()`");
+        }
+
+        #[allow(dead_code)]
+        fn private_function() {
+            println!("called `my_module::nested::private_function()`");
+        }
+    }
+
+    // pub(crate) makes functions visible only within the current crate
+    pub(crate) fn public_function_in_crate() {
+        println!("called `my_module::public_function_in_crate()`");
+    }
+}
+```
