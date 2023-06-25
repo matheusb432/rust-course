@@ -37,6 +37,34 @@ pub enum BillCli {
 use crate::input::get_input;
 
 impl BillCli {
+    pub fn create_bill() -> Result<Bill, String> {
+        println!("1. Enter the bill name:");
+
+        let name = Self::get_input()?;
+        Bill::validate_name(&name)?;
+
+        println!("2. Enter bill price:");
+
+        let price = Self::get_input()?;
+        let price = match price.parse::<f64>() {
+            Err(err) => {
+                return Err(err.to_string());
+            }
+            Ok(value) => value,
+        };
+        Bill::validate_price(&price)?;
+
+        Bill::new(name, price)
+    }
+
+    pub fn key_loop(msg: &str) -> Result<String, ()> {
+        Self::bill_input_loop(Self::get_input, Some(msg))
+    }
+
+    pub fn new_bill_loop(msg: &str) -> Result<Bill, ()> {
+        Self::bill_input_loop(Self::create_bill, Some(msg))
+    }
+
     pub fn list_commands() -> Vec<&'static str> {
         vec![ADD, REMOVE, EDIT, LIST, BACK, RAW]
     }
@@ -89,6 +117,26 @@ impl BillCli {
         };
         Some(command)
     }
+
+    fn bill_input_loop<T>(
+        handle_input: impl Fn() -> Result<T, String>,
+        maybe_msg: Option<&str>,
+    ) -> Result<T, ()> {
+        loop {
+            if let Some(msg) = maybe_msg {
+                println!("{msg}");
+            }
+
+            match handle_input() {
+                Ok(bill_key) => break Ok(bill_key),
+                Err(err) => {
+                    if let Some(BillCli::Back) = BillCli::handle_err(&err) {
+                        return Err(());
+                    }
+                }
+            }
+        }
+    }
 }
 type VecStore = Vec<Bill>;
 type BillHashMap = HashMap<String, Bill>;
@@ -107,8 +155,8 @@ impl BillStore {
         }
     }
 
-    pub fn items(&self) -> &BillHashMap {
-        &self.items
+    pub fn is_empty(&self) -> bool {
+        self.items.is_empty()
     }
 
     pub fn print_list(&self) {
@@ -146,8 +194,8 @@ impl BillStore {
             BillAction::Add(bill) => {
                 let key = bill.key();
                 if !items.contains_key(&key) {
-                    println!("Successfully added bill!\n\nAdded Bill:\n{:?}\n", &bill);
                     items.insert(key, bill);
+                    println!("Successfully added bill!");
                 } else {
                     println!("Bill with key {key:?} already exists!")
                 }
@@ -155,6 +203,7 @@ impl BillStore {
             BillAction::Edit(key, bill) => {
                 if items.contains_key(&key) {
                     items.insert(key, bill);
+                    println!("Successfully edited bill!");
                 } else {
                     println!("Bill with key {key:?} does not exist so it can't be edited!")
                 }
@@ -164,7 +213,7 @@ impl BillStore {
 
                 if items.contains_key(key) {
                     items.remove(&Bill::create_key(&name));
-                    println!("Successfully removed {key:?} bill!");
+                    println!("Successfully removed bill!");
                 } else {
                     println!("Bill with key {key:?} not found!")
                 }
