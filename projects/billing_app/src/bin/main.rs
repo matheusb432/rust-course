@@ -29,77 +29,143 @@
 // * A vector is the easiest way to store the bills at stage 1, but a
 //   hashmap will be easier to work with at stages 2 and 3.
 
-use std::io::Error;
+use billing_app::bill::{Bill, BillAction, BillCli, BillStore};
+use billing_app::input::{input_mut_loop, print_help};
 
-use billing_app::bill::{Bill, BillAction, BillCli};
-use billing_app::input::{get_input, input_loop, input_mut_loop, print_help};
-
-fn handle_command(input: &str, mut store: &mut Vec<Bill>) -> Result<(), String> {
+fn handle_command(input: &str, store: &mut BillStore) -> Result<(), String> {
     let cli_command = BillCli::new_result(input)?;
-    // ? With PowerState as Option
     match cli_command {
         BillCli::Add => {
             let new_bill = loop {
                 println!("Add a bill:");
 
-                match handle_add() {
+                match create_bill() {
                     Ok(b) => break b,
                     Err(err) => {
-                        println!("ERROR: {err:?}");
-                        println!("Trying again..");
-                        continue;
+                        if let Some(BillCli::Back) = BillCli::handle_err(&err) {
+                            return Ok(());
+                        }
                     }
                 };
             };
+            store.dispatch(BillAction::Add(new_bill));
+        }
+        BillCli::Remove => {
+            if store.items().is_empty() {
+                println!("No bills can be removed!");
+                return Ok(());
+            }
 
-            Bill::dispatch_vec(&mut store, BillAction::Add(new_bill));
+            store.print_list();
+            let name_key = loop {
+                match create_bill_key() {
+                    Ok(bill_key) => break bill_key,
+                    Err(err) => {
+                        if let Some(BillCli::Back) = BillCli::handle_err(&err) {
+                            return Ok(());
+                        }
+                    }
+                }
+            };
+            store.dispatch(BillAction::Remove(name_key));
+        }
+        BillCli::Edit => {
+            if store.items().is_empty() {
+                println!("No bills can be edited!");
+                return Ok(());
+            }
+
+            store.print_list();
+            let name_key = loop {
+                match create_bill_key() {
+                    Ok(bill_key) => {
+                        if !store.exists(&bill_key) {
+                            println!("Bill with key {bill_key:?} does not exist!");
+                            continue;
+                        }
+
+                        break bill_key;
+                    }
+                    Err(err) => {
+                        if let Some(BillCli::Back) = BillCli::handle_err(&err) {
+                            return Ok(());
+                        }
+                    }
+                }
+            };
+
+            let new_bill = loop {
+                println!("Edit a bill:");
+
+                match create_bill() {
+                    Ok(b) => break b,
+                    Err(err) => {
+                        if let Some(BillCli::Back) = BillCli::handle_err(&err) {
+                            return Ok(());
+                        }
+                    }
+                };
+            };
+            store.dispatch(BillAction::Edit(name_key, new_bill));
         }
         BillCli::List => {
-            println!("List of bills:");
-            dbg!(store);
+            store.print_list();
+        }
+        BillCli::Raw => {
+            println!("\nStore Items HashMap:\n{store:?}\n\n");
         }
         BillCli::Back => {
-            println!("Going back...");
-        }
-        _ => {
-            println!("Not implemented!")
+            println!("Can't go back from starting point!");
         }
     }
     Ok(())
 }
 
-fn handle_add() -> Result<Bill, String> {
+fn handle_edit() {
+    // TODO implement this msg
+    // if let Some(old_bill) = self.items.get(&key) {
+    //     let key_copy = key.clone();
+    //     self.items.insert(key, bill);
+    //     let new_bill = &self.items.get(&key_copy);
+    //     println!(
+    //         "Successfully added bill!\n\nOld Bill:\n{:?}New Bill:\n{:?}\n",
+    //         old_bill, new_bill
+    //     );
+    // } else {
+    //     println!("Bill with key {key:?} does not exist so it can't be edited!")
+    // }
+}
+
+fn create_bill() -> Result<Bill, String> {
     println!("1. Enter the bill name:");
 
-    let name = match get_input() {
-        Ok(input) => {
-            Bill::validate_name(input.as_str())?;
-            input
-        }
-        Err(err) => return Err(err.to_string()),
-    };
+    let name = BillCli::get_input()?;
+    Bill::validate_name(&name)?;
 
     println!("2. Enter bill price:");
 
-    let price = match get_input() {
-        Ok(input) => {
-            let value = match input.parse::<f64>() {
-                Err(err) => return Err(err.to_string()),
-                Ok(value) => value,
-            };
-            Bill::validate_price(&value)?;
-            value
+    let price = BillCli::get_input()?;
+    let price = match price.parse::<f64>() {
+        Err(err) => {
+            return Err(err.to_string());
         }
-        Err(err) => return Err(err.to_string()),
+        Ok(value) => value,
     };
+    Bill::validate_price(&price)?;
 
     Bill::new(name, price)
 }
 
+fn create_bill_key() -> Result<String, String> {
+    println!("- Enter the bill name to remove:");
+
+    BillCli::get_input()
+}
+
 fn main() {
-    let mut vec_store = Bill::create_vec_store();
+    let mut store = BillStore::create_store();
     let commands = BillCli::list_commands();
-    let handle_input = |input: &str| handle_command(input, &mut vec_store);
+    let handle_input = |input: &str| handle_command(input, &mut store);
 
     print_help(&commands);
     match input_mut_loop(handle_input, &commands) {
