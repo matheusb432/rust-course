@@ -1,4 +1,13 @@
-use billing_app::bill::{Bill, BillAction, BillCli};
+// use billing_app::bill::cli::Billli;
+// use billing_app::bill::model::Bill;
+// use billing_app::bill::store::{BillAction, BillStore};
+// NOTE Importing multiple modules in a more concise way
+use billing_app::bill::{
+    cli::BillCli,
+    model::Bill,
+    store::{BillAction, BillStore},
+};
+
 use billing_app::input::{get_input, input_mut_loop, print_help};
 
 fn handle_command(input: &str, mut store: &mut Vec<Bill>) -> Result<(), String> {
@@ -18,7 +27,7 @@ fn handle_command(input: &str, mut store: &mut Vec<Bill>) -> Result<(), String> 
                 };
             };
 
-            Bill::dispatch_vec(&mut store, BillAction::Add(new_bill));
+            BillStore::dispatch_vec(&mut store, BillAction::Add(new_bill));
         }
         BillCli::List => {
             println!("List of bills:");
@@ -63,7 +72,7 @@ fn handle_add() -> Result<Bill, String> {
 }
 
 fn main() {
-    let mut vec_store = Bill::create_vec_store();
+    let mut vec_store = BillStore::create_vec_store();
     let commands = BillCli::list_commands();
     let handle_input = |input: &str| handle_command(input, &mut vec_store);
 

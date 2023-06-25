@@ -21,10 +21,8 @@ fn print_raw(store: &BillStore) {
 
 fn add_bill(store: &mut BillStore) {
     let new_bill = match BillCli::new_bill_loop("Add a bill:") {
-        Err(_) => {
-            return;
-        }
         Ok(bill) => bill,
+        Err(_) => return,
     };
     store.dispatch(BillAction::Add(new_bill));
 }
@@ -50,33 +48,25 @@ fn edit_bill(store: &mut BillStore) {
     store.print_list();
 
     let key = match BillCli::key_loop("- Enter the bill name to edit:") {
-        Err(_) => {
-            return;
-        }
         Ok(key) => key,
+        Err(_) => return,
     };
     let new_bill = match BillCli::new_bill_loop("Edit a bill:") {
-        Err(_) => {
-            return;
-        }
         Ok(bill) => bill,
+        Err(_) => return,
     };
 
     store.dispatch(BillAction::Edit(key, new_bill));
 }
 
 fn main() {
-    let mut store = BillStore::create_store();
+    let mut store = BillStore::new();
     let commands = BillCli::list_commands();
     let handle_input = |input: &str| handle_command(input, &mut store);
 
     print_help(&commands);
     match input_mut_loop(handle_input, &commands) {
-        Ok(_) => {
-            println!("Exiting program...");
-        }
-        Err(err) => {
-            println!("ERROR: {err:?}");
-        }
+        Ok(_) => println!("Exiting program..."),
+        Err(err) => println!("ERROR: {err:?}"),
     }
 }
