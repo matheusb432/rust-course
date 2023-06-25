@@ -17,8 +17,12 @@ pub enum PowerState {
 }
 
 impl PowerState {
-    pub fn from_str(value: &str) -> Result<Self, String> {
-        Self::from_lowercase_str(value.to_lowercase().as_str())
+    pub fn new(value: &str) -> Option<Self> {
+        Self::new_lowercase(value.to_lowercase().as_str())
+    }
+
+    pub fn res_from_str(value: &str) -> Result<Self, String> {
+        Self::res_from_lowercase_str(value.to_lowercase().as_str())
     }
 
     pub fn print(&self) {
@@ -33,7 +37,7 @@ impl PowerState {
     }
 
     // NOTE Handling the conversion from a string to a power state enum value
-    fn from_lowercase_str(value: &str) -> Result<Self, String> {
+    fn new_lowercase(value: &str) -> Option<Self> {
         let power_state = match value {
             OFF => PowerState::Off,
             SLEEP => PowerState::Sleep,
@@ -42,11 +46,17 @@ impl PowerState {
             HIBERNATE => PowerState::Hibernate,
             // NOTE If the value is not one of the power states, return an error
             _ => {
-                // * 4.
-                return Err("Not a valid power state!".to_owned());
+                return None;
             }
         };
 
-        Ok(power_state)
+        Some(power_state)
+    }
+
+    fn res_from_lowercase_str(value: &str) -> Result<Self, String> {
+        match Self::new(value) {
+            Some(power_state) => Ok(power_state),
+            None => Err("Not a valid power state!".to_owned()),
+        }
     }
 }

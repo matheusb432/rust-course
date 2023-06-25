@@ -34,7 +34,14 @@ pub fn input_loop(
 
 pub fn print_help(commands: &Vec<&str>) {
     // NOTE Shadowing `commands` so it's more memory efficient and there's not need to create a `commands_str` variable
-    let commands = commands
+    // * Creating via join(), is it more memory efficient this way?
+    // let commands: String = commands
+    //     .iter()
+    //     .map(|command| format!("- {}\n", command))
+    //     .collect::<Vec<String>>()
+    //     .join("");
+    // ? Creating via fold()
+    let commands: String = commands
         .iter()
         .fold("".to_owned(), |acc, curr| format!("- {curr}\n{acc}"));
 

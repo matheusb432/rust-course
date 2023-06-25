@@ -28,10 +28,18 @@ use code::input::{input_loop, print_help};
 use code::power_state::{PowerState, HIBERNATE, OFF, REBOOT, SHUTDOWN, SLEEP};
 
 fn handle_power_state(input: &str) -> Result<(), String> {
+    // ? With PowerState as Result
     // NOTE The `?` operator on a Result essentially does optional chaining
-    PowerState::from_str(input)?.print();
+    // PowerState::res_from_str(input)?.print();
+    // Ok(())
 
-    Ok(())
+    // ? With PowerState as Option
+    if let Some(power_state) = PowerState::new(input) {
+        power_state.print();
+        Ok(())
+    } else {
+        Err("Not a valid power state!".to_owned())
+    }
 }
 
 fn main() {
