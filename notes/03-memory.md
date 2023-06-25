@@ -2,6 +2,16 @@
 
 All programs must track their memory usage. This is done by allocating and freeing memory. If they fail to do so, a memory leak occurs. This is a serious problem, as it can cause the program or even the entire system to crash.
 
+To transfer access to data without copying it, Rust uses pointers. A pointer is a value that describes a location in memory.
+
+Rust follows the Pointer Safety Principle; data should never be aliased and mutated at the same time. This is enforced at compile time.
+
+## Variables
+
+Variables live in the stack in memory, they're stored in frames. A frame is a mapping from variables to values within a single scope, such as a function.
+
+Frames are organized into a stack of currently-called-functions. After a function returns, Rust deallocates the function's frame. This sequence of frames is called a stack because the most recent frame added is always the next frame freed.
+
 ## Ownership
 
 Rust utilizes an "ownership" model to manage memory. This means that every value has a single owner, and that owner is responsible for cleaning up the memory.

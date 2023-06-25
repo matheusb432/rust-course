@@ -2,6 +2,18 @@
 
 Type annotations are mostly optional within function bodies, they can be explicitly specified using let bindings, but it's usually better to let the compiler infer the types
 
+## Scalar Types
+
+A scalar type represents a single value. Rust has four primary scalar types: ints, floats, bools, and chars.
+
+### Integers
+
+the isize and usize types depend on the architecture of the computer your program is running on, as in “arch” types: 64 bits on a 64-bit architecture and 32 bits on a 32-bit architecture.
+
+### Floats
+
+The default float type is f64 because on modern CPUs, it’s roughly the same speed as f32 but is capable of more precision. All floating-point types are signed.
+
 ## Struct
 
 A struct (structure) is a type that contain multiple fields to group similar data together, much like an object

@@ -1,8 +1,13 @@
 # Rust Fundamentals 🦀
 
-Rust is an expression-based language, this means that most things are evaluated and return some value
+Rust is an expression-based language, this means that most things are evaluated and return some value, anything that doesn't return a value is a statement.
 
-Memory only stores binary data, and code is compiled to binary representation
+```rust
+// `let x` is a statement, `5 + 5` is an expression
+let x = 5 + 5;
+```
+
+Rust uses the term panicking when a program exits with an error
 
 ## Variables
 
@@ -132,6 +137,22 @@ while x > 0 {
     println!("{x:?}");
     x -= 1;
 }
+```
+
+You can return values out of a loop by adding an expression after the `break` keyword, like so:
+
+```rust
+let mut counter = 0;
+
+let result = loop {
+    counter += 1;
+
+    if counter == 10 {
+        // Will return 20 and break out of the loop
+        break counter * 2;
+    }
+};
+println!("The result is {result}"); // "The result is 20"
 ```
 
 ### Match expressions
