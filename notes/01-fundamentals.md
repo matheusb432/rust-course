@@ -213,3 +213,38 @@ mod my_module {
     }
 }
 ```
+
+## Traits
+
+Traits are a way to define shared behavior between types. Traits are similar to interfaces in other languages.
+
+```rust
+trait Noise {
+    fn make_noise(&self);
+}
+
+struct Person;
+// Implementing the trait Noise for the struct Person
+impl Noise for Person {
+    // The trait method signature must be the same as the one defined in the trait
+    fn make_noise(&self) {
+        println!("hello");
+    }
+}
+
+struct Dog;
+impl Noise for Dog {
+    fn make_noise(&self) {
+        println!("woof");
+    }
+}
+
+fn hello(noisy: impl Noise) {
+    noisy.make_noise();
+}
+
+fn main() {
+    hello(Person {});
+    hello(Dog {});
+}
+```
