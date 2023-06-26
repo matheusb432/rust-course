@@ -24,9 +24,9 @@ Each value in Rust has a variable that is its owner. The scope in which the vari
 
 In Rust, memory can either be "moved" or "borrowed".
 
-When a value is moved, the ownership is transferred to the new owner. the new owner is now responsible for deleting the data
+### Moving memory
 
-Moving memory:
+When a value is moved, the ownership is transferred to the new owner. the new owner is now responsible for deleting the data
 
 ```rust
 enum Light {
@@ -42,19 +42,17 @@ fn display_light(light: Light) {
     }
 }
 
-fn main() {
-    // NOTE dull is owned by the main function
-    let dull = Light::Dull;
-    // NOTE passing dull as an argument will "move" it to the display_light function
-    display_light(dull);
-    // NOTE This will NOT compile, dull has already been deleted in memory
-    display_light(dull);
-}
+// NOTE dull is owned by the main function
+let dull = Light::Dull;
+// NOTE passing dull as an argument will "move" it to the display_light function
+display_light(dull);
+// NOTE This will NOT compile, dull has already been deleted in memory
+display_light(dull);
 ```
 
-When a value is borrowed, the ownership is not transferred, but the borrower is only allowed to use the value for a limited time, and it will not take responsibility for deleting the data.
+### Borrowing memory
 
-Borrowing memory:
+When a value is borrowed, the ownership is not transferred, but the borrower is allowed to use the value for a limited time, and it will not take responsibility for deleting the data.
 
 ```rust
 
@@ -72,12 +70,47 @@ fn display_light(light: &Light) {
     }
 }
 
-fn main() {
-    let dull = Light::Dull;
-    // NOTE passing `&dull` will "borrow" it to the display_light function
-    display_light(&dull);
-    // NOTE This will work now since dull has not yet been deleted in memory
-    display_light(&dull);
+let dull = Light::Dull;
+// NOTE passing `&dull` will "borrow" it to the display_light function
+display_light(&dull);
+// NOTE This will work now since dull has not yet been deleted in memory
+display_light(&dull);
+```
+
+Creating a reference to mutable data ("borrowing" it) causes that data to be temporarily read-only until the reference is no longer used. This ensures that mutable references are memory safe.
+
+Mutable references are also called "unique references"
+
+As a part of the Pointer Safety Principle, the borrow checker enforces that data must outlive any references to it.
+
+## The Stack and the Heap
+
+In Rust, data is stored in memory in two principal areas: the stack and the heap.
+
+### Stack
+
+- The stack is an area of memory that stores values in the order in which they are received and removes them in the opposite order. This behavior is known as last-in, first-out (LIFO).
+- Data stored on the stack must have a known, fixed size at compile time.
+- Accessing data on the stack is typically faster than accessing data on the heap because the stack is structured in such a way that it uses offsets to access data quickly.
+- In Rust, basic data types like integers, floating-point numbers, and structs with fixed size are typically stored on the stack.
+- Vectors in Rust use both the stack and the heap. The vector's metadata (such as length, capacity, and a pointer to the data) is stored on the stack, while the actual elements of the vector are stored on the heap.
+- The fact that vectors have a single type of data is related to Rust's static typing and not directly linked to their use of the stack for metadata. Rust ensures that elements of a vector are of the same type for type safety and performance reasons.
+
+### Heap
+
+- The heap is an area of memory where data is allocated dynamically, at runtime.
+- A pointer to the heap-allocated data is usually stored on the stack. This pointer keeps the memory address of where the data is actually stored on the heap.
+- Accessing data on the heap is generally slower than on the stack because the memory address must be dereferenced, and the heap has more complex memory management.
+- In Rust, data types like vectors, strings, and other dynamically-sized collections are stored on the heap because they can grow or shrink as needed.
+
+```rust
+struct Entry {
+    id: i32,
 }
 
+let data = Entry { id: 5 };
+// NOTE Putting the data on the heap, Box is a pointer to some data on the heap
+let data_ptr: Box<Entry> = Box::new(data);
+// NOTE Dereferencing the pointer to move the data back to the Stack
+let data_stack = *data_ptr;
 ```

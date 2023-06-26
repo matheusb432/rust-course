@@ -198,6 +198,8 @@ match sound {
 
 Traits are a way to define shared behavior between types. Traits are similar to interfaces in other languages.
 
+Traits can only access data through functions that are defined in the trait, they are unable to access fields directly.
+
 ```rust
 trait Noise {
     fn make_noise(&self);
@@ -295,4 +297,69 @@ trait Seat {
 struct Ticket<T: Seat> {
     seat: T,
 }
+```
+
+## Trait Objects
+
+- Trait objects offer a way to dynamically change program behavior at runtime, at the cost of performance.
+- They use "dynamic dispatch" to determine which method to call at runtime. In contrast to Generics which use static dispatch.
+- They allow for mixed types in a collection and polymorphism.
+  - It's ideal to only use them for small collections, since they can be much slower than generics.
+
+```rust
+trait Clicky {
+    fn click(&self);
+}
+
+struct Keyboard;
+
+impl Clicky for Keyboard {
+    fn click(&self) {
+        println!("clicked");
+    }
+}
+
+let kb = Keyboard;
+let kb_obj: &dyn Clicky = &kb;
+
+// Alternate way to create a trait object
+let kb: &dyn Clicky = &Keyboard;
+
+// Creating a trait object from a Box for more flexibility
+let kb: Box<dyn Clicky> = Box::new(Keyboard);
+
+// Setting a function that accepts a trait object that implements the Clicky trait
+fn borrow_clicky(obj: &dyn Clicky) {
+    obj.click();
+}
+
+let kb = Keyboard;
+borrow_clicky(&kb);
+
+fn move_clicky(obj: Box<dyn Clicky>) {
+    obj.click();
+}
+
+let kb = Box::new(Keyboard);
+move_clicky(kb);
+```
+
+### Creating a heterogeneous collection
+
+```rust
+struct Mouse;
+impl Clicky for Mouse {
+    fn click(&self) {
+        println!("clicked");
+    }
+}
+
+let kb: Box<dyn Clicky> = Box::new(Keyboard);
+let mouse: Box<dyn Clicky> = Box::new(Mouse);
+let clickers = vec![kb, mouse];
+
+// Alternate way to create a heterogeneous collection, more concise
+let kb = Box::new(Keyboard);
+let mouse = Box::new(Mouse);
+let clickers: Vec<Box<dyn Clicky>> = vec![kb, mouse];
 ```
