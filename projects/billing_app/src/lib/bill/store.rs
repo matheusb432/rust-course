@@ -6,9 +6,9 @@ pub enum BillAction {
     Add(Bill),
     Remove(String),
     Edit(String, Bill),
+    SetPrice(String, f64),
 }
 
-type VecStore = Vec<Bill>;
 type BillHashMap = HashMap<String, Bill>;
 
 #[derive(Debug)]
@@ -26,6 +26,10 @@ impl BillStore {
 
     pub fn is_empty(&self) -> bool {
         self.items.is_empty()
+    }
+
+    pub fn get_all(&self) -> Vec<&Bill> {
+        self.items.values().collect()
     }
 
     pub fn print_list(&self) {
@@ -46,6 +50,7 @@ impl BillStore {
 
         items.get(&Bill::create_key(&name))
     }
+
     pub fn exists(&self, name: &str) -> bool {
         let items = &self.items;
 
@@ -72,31 +77,25 @@ impl BillStore {
                     println!("Bill with key {key:?} does not exist so it can't be edited!")
                 }
             }
+            BillAction::SetPrice(key, price) => {
+                // NOTE get_mut returns a mutable reference in a HashMap by it's key
+                if let Some(old_bill) = items.get_mut(&key) {
+                    match old_bill.set_price(price) {
+                        Ok(_) => println!("Successfully set a new price!"),
+                        Err(err) => println!("Error setting price: {err}"),
+                    }
+                }
+            }
             BillAction::Remove(name) => {
                 let key = &Bill::create_key(&name);
 
-                if items.contains_key(key) {
-                    items.remove(&Bill::create_key(&name));
+                // NOTE .is_some() will return true if an item was removed
+                if items.remove(&Bill::create_key(&name)).is_some() {
                     println!("Successfully removed bill!");
                 } else {
                     println!("Bill with key {key:?} not found!")
                 }
             }
         }
-    }
-
-    pub fn create_vec_store() -> VecStore {
-        vec![]
-    }
-
-    pub fn dispatch_vec(state: &mut VecStore, action: BillAction) -> &VecStore {
-        match action {
-            BillAction::Add(new_bill) => {
-                println!("Successfully added bill! Added Bill:\n{:?}", &new_bill);
-                state.push(new_bill);
-            }
-            _ => panic!("Not implemented!"),
-        }
-        state
     }
 }

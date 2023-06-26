@@ -2,12 +2,11 @@ use billing_app::bill::{BillAction, BillCli, BillStore};
 use billing_app::input::{input_mut_loop, print_help};
 
 fn handle_command(input: &str, store: &mut BillStore) -> Result<(), String> {
-    let cli_command = BillCli::new_result(input)?;
-
-    match cli_command {
+    match BillCli::new_result(input)? {
         BillCli::Add => add_bill(store),
         BillCli::Remove => remove_bill(store),
         BillCli::Edit => edit_bill(store),
+        BillCli::SetPrice => set_bill_price(store),
         BillCli::List => store.print_list(),
         BillCli::Raw => print_raw(store),
         BillCli::Back => println!("Can't go back from starting point!"),
@@ -19,6 +18,16 @@ fn print_raw(store: &BillStore) {
     println!("\nStore Items HashMap:\n{store:?}\n\n");
 }
 
+fn get_bill_key(store: &BillStore, msg: &str) -> Option<String> {
+    if store.is_empty() {
+        println!("No bills found!");
+        return None;
+    }
+    store.print_list();
+    // NOTE More concise way to discard the Err of a Result<T>
+    BillCli::key_loop(msg).ok()
+}
+
 fn add_bill(store: &mut BillStore) {
     let new_bill = match BillCli::new_bill_loop("Add a bill:") {
         Ok(bill) => bill,
@@ -28,28 +37,17 @@ fn add_bill(store: &mut BillStore) {
 }
 
 fn remove_bill(store: &mut BillStore) {
-    if store.is_empty() {
-        println!("No bills can be removed!");
-        return;
-    }
-
-    store.print_list();
-    if let Ok(key) = BillCli::key_loop("- Enter the bill name to remove:") {
-        store.dispatch(BillAction::Remove(key))
-    }
+    let key = match get_bill_key(&store, "- Enter the bill name to remove:") {
+        Some(key) => key,
+        None => return,
+    };
+    store.dispatch(BillAction::Remove(key))
 }
 
 fn edit_bill(store: &mut BillStore) {
-    if store.is_empty() {
-        println!("No bills can be edited!");
-        return;
-    }
-
-    store.print_list();
-
-    let key = match BillCli::key_loop("- Enter the bill name to edit:") {
-        Ok(key) => key,
-        Err(_) => return,
+    let key = match get_bill_key(&store, "- Enter the bill name to edit:") {
+        Some(key) => key,
+        None => return,
     };
     let new_bill = match BillCli::new_bill_loop("Edit a bill:") {
         Ok(bill) => bill,
@@ -57,6 +55,20 @@ fn edit_bill(store: &mut BillStore) {
     };
 
     store.dispatch(BillAction::Edit(key, new_bill));
+}
+
+fn set_bill_price(store: &mut BillStore) {
+    let key = match get_bill_key(&store, "- Enter the bill name to edit:") {
+        Some(key) => key,
+        None => return,
+    };
+    println!("Enter a new price");
+    let new_price = match BillCli::get_price() {
+        Ok(price) => price,
+        Err(_) => return,
+    };
+
+    store.dispatch(BillAction::SetPrice(key, new_price));
 }
 
 fn main() {

@@ -1,16 +1,12 @@
-// use billing_app::bill::cli::Billli;
-// use billing_app::bill::model::Bill;
-// use billing_app::bill::store::{BillAction, BillStore};
 // NOTE Importing multiple modules in a more concise way
 use billing_app::bill::{
     cli::BillCli,
-    model::Bill,
-    store::{BillAction, BillStore},
+    model::{Bill, Bills},
 };
 
 use billing_app::input::{get_input, input_mut_loop, print_help};
 
-fn handle_command(input: &str, mut store: &mut Vec<Bill>) -> Result<(), String> {
+fn handle_command(input: &str, store: &mut Bills) -> Result<(), String> {
     let cli_command = BillCli::new_result(input)?;
     match cli_command {
         BillCli::Add => {
@@ -27,11 +23,11 @@ fn handle_command(input: &str, mut store: &mut Vec<Bill>) -> Result<(), String> 
                 };
             };
 
-            BillStore::dispatch_vec(&mut store, BillAction::Add(new_bill));
+            store.add(new_bill)
         }
         BillCli::List => {
             println!("List of bills:");
-            dbg!(store);
+            dbg!(store.get_all());
         }
         BillCli::Back => {
             println!("Going back...");
@@ -72,10 +68,11 @@ fn handle_add() -> Result<Bill, String> {
 }
 
 fn main() {
-    let mut vec_store = BillStore::create_vec_store();
+    let mut bills = Bills::new();
     let commands = BillCli::list_commands();
-    let handle_input = |input: &str| handle_command(input, &mut vec_store);
+    let handle_input = |input: &str| handle_command(input, &mut bills);
 
+    println!("Stage 1 implementation");
     print_help(&commands);
     match input_mut_loop(handle_input, &commands) {
         Ok(_) => {

@@ -6,10 +6,27 @@ use std::io;
 pub fn get_input() -> io::Result<String> {
     let mut buffer = String::new();
 
-    io::stdin().read_line(&mut buffer)?;
+    while io::stdin().read_line(&mut buffer).is_err() {
+        println!("Please enter your data again");
+    }
 
     Ok(buffer.trim().to_owned())
 }
+// ? Alternative with Option
+// pub fn get_input() -> Option<String> {
+//     let mut buffer = String::new();
+
+//     while io::stdin().read_line(&mut buffer).is_err() {
+//         println!("Please enter your data again");
+//     }
+
+//     let input = buffer.trim().to_owned();
+//     if &input == "" {
+//         None
+//     } else {
+//         Some(input)
+//     }
+// }
 
 pub fn input_loop(
     handle_input: impl Fn(&str) -> Result<(), String>,

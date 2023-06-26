@@ -7,7 +7,9 @@ Goals is to practice Rust concepts:
 - Enums, Option, Result, match, iterators, etc
 - Ownership / Borrowing / Mutability
 
-## Task Description
+The original implementation only needed very basic features, to practice more things I implemented field validations, more descriptive errors, proper encapsulation of the Bill struct and the BillStore, and the reducer pattern to dispatch actions, so my solution is very different than the original as a result
+
+## Original Task Description
 
 Project 1: Interactive bill manager
 

@@ -29,6 +29,16 @@ impl Bill {
         Ok(Self { name, price })
     }
 
+    pub fn set_price(&mut self, price: f64) -> Result<(), String> {
+        Self::validate_price(&price)?;
+        self.price = price;
+        Ok(())
+    }
+
+    pub fn price(&self) -> f64 {
+        self.price
+    }
+
     pub fn key(&self) -> String {
         Self::create_key(&self.name)
     }
@@ -39,5 +49,23 @@ impl Bill {
 
     pub fn print(&self) {
         println!("{}\t|\t${}", self.name, self.price)
+    }
+}
+
+pub struct Bills {
+    inner: Vec<Bill>,
+}
+
+impl Bills {
+    pub fn new() -> Self {
+        Self { inner: vec![] }
+    }
+
+    pub fn add(&mut self, bill: Bill) {
+        self.inner.push(bill)
+    }
+
+    pub fn get_all(&self) -> Vec<&Bill> {
+        self.inner.iter().collect()
     }
 }
