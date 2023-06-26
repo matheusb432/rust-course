@@ -193,3 +193,106 @@ match sound {
     Err(err) => println!("Error: {:?}", err),
 }
 ```
+
+## Traits
+
+Traits are a way to define shared behavior between types. Traits are similar to interfaces in other languages.
+
+```rust
+trait Noise {
+    fn make_noise(&self);
+}
+
+struct Person;
+// Implementing the trait Noise for the struct Person
+impl Noise for Person {
+    // The trait method signature must be the same as the one defined in the trait
+    fn make_noise(&self) {
+        println!("hello");
+    }
+}
+
+struct Dog;
+impl Noise for Dog {
+    fn make_noise(&self) {
+        println!("woof");
+    }
+}
+
+fn hello(noisy: impl Noise) {
+    noisy.make_noise();
+}
+
+fn main() {
+    hello(Person {});
+    hello(Dog {});
+}
+```
+
+## Generics
+
+Generic types are a way to define a type that can be used with multiple other types.
+
+```rust
+fn function<T: Trait1, U: Trait2>(param1: T, param2: U) {
+    // ...
+}
+
+// `where` syntax, usually better to use when there's two or more generic types
+fn function<T, U>(param1: T, param2: U)
+where
+    // NOTE T must implement both Trait1 and Trait2
+    T: Trait1 + Trait2,
+    U: Trait1 + Trait2 + Trait3,
+{
+    // ...
+}
+```
+
+Refactoring a generic function so it's type can be used elsewhere:
+
+```rust
+fn hello(noisy: impl Noise) {
+    noisy.make_noise();
+}
+// Refactored to a generic function
+fn hello<T: Noise>(noisy: T) {
+    noisy.make_noise();
+}
+```
+
+Rust uses monomorphization to generate code for each concrete type used with a generic type, meaning that the generic type is replaced with the concrete type at compile time.
+
+This leads to an increase in the binary size, but also an increase in performance since the compiler can optimize the code for each concrete type.
+
+```rust
+
+// Generic function
+fn hello<T>(noisy: T) {
+    noisy.make_noise();
+}
+
+// Concrete use
+hello(Person {});
+
+// The compiler will generate the following code at compile time
+fn hello(noisy: Person) {
+    noisy.make_noise();
+}
+```
+
+Generic structures:
+
+```rust
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+trait Seat {
+    fn show(&self);
+}
+struct Ticket<T: Seat> {
+    seat: T,
+}
+```
