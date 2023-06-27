@@ -7,7 +7,7 @@ Rust is an expression-based language, this means that most things are evaluated 
 let x = 5 + 5;
 ```
 
-Rust uses the term panicking when a program exits with an error
+In general, writing Rust functions is a careful balance of asking for the right level of permission.
 
 ## Variables
 
@@ -60,6 +60,44 @@ fn add(x: i32, y: i32) -> i32 {
 }
 
 let res = add(5, 10); // 15
+```
+
+## Expressions
+
+Expression values coalesce to a single point, they can be used for nesting logic
+
+It's also possible to nest expressions, but it should be limited to 2 or 3 levels of nesting so the code doesn't become too complex
+
+```rust
+let my_num = 3;
+// Setting is_lt_5 to the result of the expression
+let is_lt_5 = if my_num < 5 {
+    true
+} else {
+    false
+};
+
+// Equivalent since the ternary expression would be redundant
+let is_lt_5 = my_num < 5;
+
+// Possible to set message to the result of the match expression
+let message = match my_num {
+    1 => "hello",
+    _ => "goodbye",
+}
+```
+
+## Closure
+
+A closure is simply an anonymous function. It can be stored in a variable, passed as an argument to a function, or returned from a function.
+
+```rust
+
+// A closure that takes no arguments and returns nothing
+let say_hello = || println!("Hello!");
+
+// A closure that takes two arguments and returns the sum of them
+let sum = |a, b| -> i32 { a + b };
 ```
 
 ## Macros

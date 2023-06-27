@@ -14,6 +14,27 @@ the isize and usize types depend on the architecture of the computer your progra
 
 The default float type is f64 because on modern CPUs, it’s roughly the same speed as f32 but is capable of more precision. All floating-point types are signed.
 
+## Type Aliases
+
+Type aliases are a way to give a new name to an existing type. They are declared using the type keyword, they are most useful to alias long type names to more succinct ones.
+
+```rust
+struct Contact {
+    name: String,
+    phone: String,
+}
+
+type ContactName = String;
+type ContactIndex = HashMap<ContactName, Contact>;
+
+fn add_contact(index: &mut ContactIndex, contact: Contact) {
+    index.insert(contact.phone.to_owned(), contact);
+}
+
+// Aliasing a generic type
+type GenericThings<T> = Vec<Thing<T>>;
+```
+
 ## Struct
 
 A struct (structure) is a type that contain multiple fields to group similar data together, much like an object
@@ -38,51 +59,27 @@ let my_box = ShippingBox {
 println!(my_box.depth) // 3
 ```
 
-## Tuples
+## Impl
 
-A type of record to store data anonymously (unnamed fields) that can be easily destructured into variables
+Implementations allows you to define methods that operate on instances of a struct or an enum, as well as associated functions that do not operate on an instance but are associated with the type. Additionally, it's used for implementing traits for specific types.
 
-Ideally tuples should have at most 3 values, if more values than that are needed, structs should be used instead
-
-Useful to return pairs of data from functions
+Implementations enable the usage of OOP patterns.
 
 ```rust
-enum Access {
-    Full,
+struct Rectangle {
+    width: u32,
+    height: u32,
 }
 
-fn one_two_three() -> (i32, i32, i32) {
-    (1, 2, 3)
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
 }
 
-let numbers = one_two_three();
-println!("numbers -> {:?}", numbers);
-let (employee, access) = ("John", Access::Full);
-```
+let rect1 = Rectangle { width: 30, height: 50 };
 
-## Expressions
-
-Expression values coalesce to a single point, they can be used for nesting logic
-
-It's also possible to nest expressions, but it should be limited to 2 or 3 levels of nesting so the code doesn't become too complex
-
-```rust
-let my_num = 3;
-// Setting is_lt_5 to the result of the expression
-let is_lt_5 = if my_num < 5 {
-    true
-} else {
-    false
-};
-
-// Equivalent since the ternary expression would be redundant
-let is_lt_5 = my_num < 5;
-
-// Possible to set message to the result of the match expression
-let message = match my_num {
-    1 => "hello",
-    _ => "goodbye",
-}
+println!("The area of the rectangle is {} square pixels.", rect1.area());
 ```
 
 ## Option

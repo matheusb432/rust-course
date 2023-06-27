@@ -2,33 +2,33 @@
 
 [When to use each collection](https://doc.rust-lang.org/std/collections/index.html#when-should-you-use-which-collection)
 
-## Impl
+## Iterators
 
-Implementations allows you to define methods that operate on instances of a struct or an enum, as well as associated functions that do not operate on an instance but are associated with the type. Additionally, it's used for implementing traits for specific types.
-
-Implementations enable the usage of OOP patterns.
+Iterators are lazy and do nothing unless consumed for performance reasons, so using collect() is necessary to run them.
 
 ```rust
-struct Rectangle {
-    width: u32,
-    height: u32,
+let numbers = vec![1, 2, 3, 4, 5];
+
+// Calling collect() on an iterator will return a vector
+let plus_one: Vec<i32> = numbers.iter().map(|num| num + 1).collect();
+```
+
+### iter() and into_iter()
+
+iter() borrows each element of the collection through each iteration, and into_iter() consumes the collection so that each iteration owns the element.
+
+```rust
+let numbers = vec![1, 2, 3, 4, 5];
+
+// borrows each element of the collection through each iteration
+for num in numbers.iter() {
+    dbg!(num); // num -> &i32
 }
 
-impl Rectangle {
-    fn area(&self) -> u32 {
-        self.width * self.height
-    }
+// consumes the collection so that each iteration owns the element
+for num in numbers.into_iter() {
+    dbg!(num); // num -> i32
 }
-
-fn main() {
-    let rect1 = Rectangle { width: 30, height: 50 };
-
-    println!(
-        "The area of the rectangle is {} square pixels.",
-        rect1.area()
-    );
-}
-
 ```
 
 ## Vector
@@ -60,7 +60,7 @@ for num in my_numbers {
 
 ## String and &str
 
-String is the owned data type, and &str is the borrowed data type.
+String is the owned data type, and &str is a string slice.
 
 Must use an owned String to store it in a struct, and it's more efficient to pass &str as a function parameter.
 
@@ -80,6 +80,28 @@ fn main() {
     print_it(&owned_string);
     print_it(&another_owned);
 }
+```
+
+## Tuples
+
+A type of record to store data anonymously (unnamed fields) that can be easily destructured into variables
+
+Ideally tuples should have at most 3 values, if more values than that are needed, structs should be used instead
+
+Useful to return pairs of data from functions
+
+```rust
+enum Access {
+    Full,
+}
+
+fn one_two_three() -> (i32, i32, i32) {
+    (1, 2, 3)
+}
+
+let numbers = one_two_three();
+println!("numbers -> {:?}", numbers);
+let (employee, access) = ("John", Access::Full);
 ```
 
 ## Enums
@@ -148,4 +170,79 @@ for person in people.keys() {
 for age in people.values() {
     println!("Age: {}", age);
 }
+```
+
+## Arrays & Slices
+
+Arrays are a fixed sized memory region that stores values of the same type. Arrays are allocated on the stack. They're useful when working with a fixed buffer size.
+
+```rust
+let numbers: [u8; 3] = [1, 2, 3];
+
+// Functions signature types
+fn func(arr: [u8; 3]) {}
+fn func(arr: &[u8]) {}
+fn func(arr: &mut [u8]) {}
+```
+
+A slice is a borrowed view into an array, they can be iterated upon and are optionally mutable.
+
+Slices can be obtained from any data structure that's backed by an array, such as vectors.
+
+```rust
+let numbers: [u8; 3] = [1, 2, 3, 4, 5];
+
+let slice: &[u8] = &numbers;
+
+// Slicing a specific range of values
+let from_one_through_two: &[u8] = &numbers[1..=2];
+let from_zero_through_two: &[u8] = &numbers[..3];
+
+let chars = vec!['a', 'b', 'c', 'd', 'e'];
+match chars.as_slice() {
+    // Possible to get first and last elements like so
+    // If the slice only has 2 elements, `..` will not have any values
+    [first, .., last] => (),
+    [first, second, ..] => (),
+    [single] => (),
+    [] => (),
+}
+
+match chars.as_slice() {
+    [first, ..] => (),
+    // ! This match arm will never match, slice patterns easily overlap
+    [.., second] => (),
+    [] => (),
+}
+
+// This works, matching on larger patterns first
+match chars.as_slice() {
+    // Will only match if the slice as 3 or more elements, then 2 or more and so on
+    [first, second, third, ..] => (),
+    [first, second, ..] => (),
+    [first, ..] => (),
+    [] => (),
+}
+
+// Using guards
+match chars.as_slice() {
+    // Will match if first is 1, 2 or 3, 'rest' is a slice of the remaining elements
+    [first @ 1..=3, rest @ ..] => (),
+    [single] if single == &5 || single == &6 => (),
+    [first, second] => (),
+    // Exhaustive patterns so all cases are covered
+    [..] => (),
+    [] => (),
+}
+```
+
+Borrowing a Vector as an argument to a function that requires a slice will automatically obtain a slice, in general it should be preferred to borrow a slice instead of a vector.
+
+```rust
+fn func(slice: &[u8]) {}
+
+let numbers = vec![1, 2, 3];
+// Will automatically borrow a slice from the vector
+func(&numbers);
+let numbers: &[u8] = numbers.as_slice();
 ```
