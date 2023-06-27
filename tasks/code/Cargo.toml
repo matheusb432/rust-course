@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.26"
+thiserror = "1.0.40"
 
 [lib]
 name = "code"
