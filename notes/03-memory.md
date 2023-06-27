@@ -114,3 +114,52 @@ let data_ptr: Box<Entry> = Box::new(data);
 // NOTE Dereferencing the pointer to move the data back to the Stack
 let data_stack = *data_ptr;
 ```
+
+## Lifetimes
+
+- Lifetimes are a way to ensure that references are valid as long as the data they refer to is valid.
+- They're needed to store borrowed data in structs or enums, and to return borrowed data from functions.
+- All data has a lifetime, but the compiler can often infer the lifetime of data, so most times it's unnecessary to explicitly annotate lifetimes.
+- Lifetimes are a form of generics, by convention they're named with 'a, 'b, 'c, etc.
+
+  - 'static data lives for the entire duration of the program
+
+- Lifetimes annotations indicates that there exists some owned data that:
+  - "Lives at least as long" as the borrowed data
+  - "Outlives or outlasts" the scope of a borrow
+  - "Exists longer than" the scope of a borrow
+- Structs using borrowed data must:
+  - Always be created _after_ the owner was created
+  - Always be destroyed _before_ the owner is destroyed
+
+```rust
+// Syntax
+fn name<'a>(arg: &'a DataType) -> &'a DataType {}
+
+enum Part {
+    Bolt,
+    Panel,
+}
+
+// A lifetime called 'a is declared
+struct RobotArm<'a> {
+    // Part` will be created before `RobotArm` and will live at least as long as `RobotArm`
+    part: &'a Part,
+}
+
+struct AssemblyLine {
+    parts: Vec<Part>,
+}
+
+let line = AssemblyLine {
+    parts: vec![Part::Bolt, Part::Panel],
+};
+
+{
+    let arm = RobotArm {
+        // The lifetime of the reference is the same as the lifetime of the AssemblyLine
+        // * BUT the part itself is not owned by RobotArm, so it won't be deleted when RobotArm is dropped
+        part: &line.parts[0],
+    };
+}
+```
