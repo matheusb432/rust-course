@@ -9,8 +9,8 @@
 // * If both strings are the same length, the first one should be returned
 
 // NOTE Returning a &str with a function by leveraging lifetimes
-// * It's necessary to specify it's lifetime so that
-// * the compiler can know that the return value is one of the parameters
+// ? It's necessary to specify it's lifetime so that
+// ? the compiler can know that the return value is one of the parameters
 fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if y.len() > x.len() {
         y

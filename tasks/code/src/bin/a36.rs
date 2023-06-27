@@ -6,7 +6,7 @@
 //      where V is the value
 // * 3. If no numbers are received, print "Data stream complete"
 
-// * As the lifetime of this slice is 'static, it will not be dropped when the function exits
+// ? As the lifetime of this slice is 'static, it will not be dropped when the function exits
 fn data() -> &'static [u64] {
     &[7, 6, 5, 4, 3, 3, 1]
 }

@@ -32,7 +32,7 @@ impl<'a> People<'a> {
     }
 }
 
-// * This can be much simpler, but I tried to make this as efficient as possible in the case of a really large CSV file
+// ? This can be much simpler, but I tried to make this as efficient as possible in the case of a really large CSV file
 fn read_people_csv(csv_data: &'static str) -> Option<Vec<Person<'_>>> {
     let lines: Vec<&str> = csv_data.split('\n').collect();
 

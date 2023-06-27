@@ -1,4 +1,4 @@
-# Rust Data Types
+# Rust Data Types 🦀
 
 Type annotations are mostly optional within function bodies, they can be explicitly specified using let bindings, but it's usually better to let the compiler infer the types
 

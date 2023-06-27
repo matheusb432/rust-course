@@ -20,6 +20,28 @@ fn main() {
 
     let add = |a: i32, b: i32| a + b;
     // NOTE Creating a box with a closure
+    // * This is necessary to call the closure from a function, as a Box has a fixed size (the
+    // * size of a pointer) and the compiler can't know the size of the closure
     let add = Box::new(add);
+    let sub = Box::new(|a, b| a - b);
+    let mul = Box::new(|a, b| {
+        println!("Multiplying {} and {}", a, b);
+        a * b
+    });
+    let name = "some name".to_owned();
+    // NOTE `move` keyword is necessary to move the ownership of the variable to the closure
+    let div = Box::new(move |a, b| {
+        println!("name: {:?}", name);
+        a / b
+    });
+    // * This won't compile as `name` has been moved to the closure
+    // * Can be fixed by using only a &str in the closure
+    // println!("name: {:?}", name);
+
     math(1, 2, add);
+    math(2, 3, sub);
+    let res = math(3, 4, mul);
+    println!("res: {}", res);
+    let res = math(8, 4, div);
+    println!("res: {}", res);
 }

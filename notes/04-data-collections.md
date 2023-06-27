@@ -1,4 +1,4 @@
-# Rust Data Collections
+# Rust Data Collections 🦀
 
 [When to use each collection](https://doc.rust-lang.org/std/collections/index.html#when-should-you-use-which-collection)
 

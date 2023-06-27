@@ -1,4 +1,4 @@
-# Memory
+# Memory in Rust 🦀
 
 All programs must track their memory usage. This is done by allocating and freeing memory. If they fail to do so, a memory leak occurs. This is a serious problem, as it can cause the program or even the entire system to crash.
 
