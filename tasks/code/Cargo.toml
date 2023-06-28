@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.26"
 crossbeam-channel = "0.5.8"
+parking_lot = "0.12.1"
 thiserror = "1.0.40"
 
 [lib]

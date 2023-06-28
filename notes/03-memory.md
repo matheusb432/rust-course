@@ -183,3 +183,58 @@ let line = AssemblyLine {
   - It's borrow checked at runtime, so it can cause panics.
 - Both `Cell` and `RefCell` are NOT thread safe.
 - In general, `mut` and `&mut` is preferred over interior mutability.
+
+### Sharing data with multiple threads
+
+- To safely share data between threads, Synchronization Primitives are used.
+- A common primitive is a `Mutex` (`Mut`ually `Ex`clusive lock). It's a smart pointer that uses atomic operations to ensure only one thread accesses data at a time.
+  - It's a blocking primitive, meaning that if a thread tries to access data that's locked, it will wait until the data is unlocked.
+  - Mutexes cannot be shared between threads, so they're often wrapped in an `Arc` pointer.
+  - The stdlib provides a mutex, but the `parking_lot` crate provides a faster mutex.
+  - Mutexes can cause deadlocks and performance issues, so CPU heavy tasks should be avoided while holding a lock, or done so before locking.
+  - Acquiring a lock is done with the `lock()` method, and unlocking occurs when the lock is dropped.
+
+### Deadlocks
+
+- Deadlock is a situation where locks are waiting on one another, preventing any of them from being released.
+- They occur when using multiple locks, recursive locks, or locking the same lock multiple times.
+
+```rust
+use parking_lot::Mutex;
+
+fn recurse(
+    data: Rc<Mutex<u32>>,
+    remaining: usize,
+) -> usize {
+    // Will lock an already locked mutex in the second call, causing a deadlock
+    let mut locked = data.lock();
+    match remaining {
+        rem if rem == 0 => 0,
+        rem => recurse(Rc::clone(&data), rem - 1),
+    }
+}
+
+// To fix it, a ReentrantMutex can be used, now a thread can lock the same mutex multiple times
+use parking_lot::ReentrantMutex;
+
+fn recurse(
+    data: Rc<ReentrantMutex<u32>>,
+    remaining: usize,
+) -> usize {
+    // Locking again will only increase the lock count, which will unlock when the lock count reaches 0
+    let mut locked = data.lock();
+    match remaining {
+        rem if rem == 0 => 0,
+        rem => recurse(Rc::clone(&data), rem - 1),
+    }
+}
+```
+
+#### Thread Contentions
+
+- Contention is when multiple threads are trying to access the same data at the same time.
+- It can cause performance issues, so it's important to avoid it.
+- One technique to avoid contention is to use exponential backoff.
+  - When a thread tries to access data that's locked, it will wait for a random amount of time before trying again.
+  - If it fails again, it will wait for a longer amount of time before trying again.
+  - This continues until the thread is able to access the data.

@@ -160,11 +160,12 @@ mod test {
             }
         }
 
-        {
-            let rentals: cell::Ref<'_, Vec<VehicleRental>> = store.rentals.borrow();
-            if let Some(rental) = rentals.get(0) {
-                assert_eq!(rental.status, VehicleStatus::Available);
-            }
+        // ? Necessary only if cell is not in scope
+        // let rentals: cell::Ref<_> = store.rentals.borrow();
+
+        let rentals = store.rentals.borrow();
+        if let Some(rental) = rentals.get(0) {
+            assert_eq!(rental.status, VehicleStatus::Available);
         }
     }
 }

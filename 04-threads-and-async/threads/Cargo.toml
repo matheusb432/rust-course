@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 crossbeam-channel = "0.5.8"
+parking_lot = "0.12.1"
