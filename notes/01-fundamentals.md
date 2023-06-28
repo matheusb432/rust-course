@@ -232,22 +232,105 @@ mod my_module {
     pub fn function() {
         println!("called `my_module::function()`");
     }
+}
+```
 
-    // Modules can also be nested
-    pub mod nested {
-        pub fn function() {
-            println!("called `my_module::nested::function()`");
-        }
+## Overloading traits
 
-        #[allow(dead_code)]
-        fn private_function() {
-            println!("called `my_module::nested::private_function()`");
+### Equality & Ordering
+
+- When comparing structs with the PartialEq, all fields must be exactly the same to return true on a `a == b` comparison, PartialOrd trait, only the first field of a struct is compared in ordering comparisons
+- This enables easier sorting and comparison of structs
+
+### Operators
+
+- Operators can be overloaded by implementing operator traits
+
+```rust
+use std::ops::Add;
+
+struct Speed(u32);
+
+impl Add<Self> for Speed {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Speed(slef.0 + rhs.0)
+    }
+}
+
+// This is now possible and will call the add method of the implementation
+let fast = Speed(5) + Speed(3); // Speed(8)
+
+// Implementations for different types can be done since the operator trait is generic
+impl Add<u32> for Speed {
+    type Output = Self;
+
+    fn add(self, rhs: u32) -> Self::Output {
+        Speed(self.0 + rhs)
+    }
+}
+let fast = Speed(5) + 3; // Speed(8)
+```
+
+Indexing can also be overloaded by implementing the `Index` trait
+
+```rust
+use std::ops::Index;
+
+struct Hvac {
+    current_temp: i16,
+    min_temp: i16,
+    max_temp: i16,
+}
+enum Temp {
+    Current,
+    Max,
+    Min,
+}
+impl Index<Temp> for Hvac {
+    type Output = i16;
+
+    fn index(&self, temp: Temp) -> &Self::Output {
+        match temp {
+            Temp::Current => &self.current_temp,
+            Temp::Max => &self.max_temp,
+            Temp::Min => &self.min_temp,
         }
     }
+}
+let env = Hvac {
+    current_temp: 20,
+    min_temp: 15,
+    max_temp: 25,
+};
+// Now we can index the struct with the implemented enum
+let current = env[Temp::Current]; // 20
+```
 
-    // pub(crate) makes functions visible only within the current crate
-    pub(crate) fn public_function_in_crate() {
-        println!("called `my_module::public_function_in_crate()`");
-    }
+### Iterators Traits
+
+- Iteration is provided by the `Iterator` trait, it's what provides the `for..in` syntax and access to the iterator adapters `map, filter, ...`
+- Can be implemented for any struct
+
+```rust
+// Iterator trait signature
+trait Iterator {
+    type Item;
+
+    fn next(&mut self) -> Option<Self::Item>;
+}
+```
+
+- The `IntoIterator` trait is used to convert a type into an iterator, it's implemented for types that can be used as collections, like arrays, vectors, and strings
+
+```rust
+// IntoIterator trait signature
+trait IntoIterator
+{
+    type Item;
+    type IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter;
 }
 ```
