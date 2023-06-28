@@ -16,6 +16,8 @@
 // Notes:
 // * Optionally use generics for each state
 
+#![allow(dead_code)]
+
 #[derive(Debug)]
 struct Luggage<TState> {
     id: usize,

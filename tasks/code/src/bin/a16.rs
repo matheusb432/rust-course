@@ -8,10 +8,12 @@
 // * 1. Use a struct containing the student's name and locker assignment
 // * 2. The locker assignment should use an Option<i32>
 
-// * 1.
+#![allow(dead_code)]
+
+// ? 1.
 struct Student {
     name: String,
-    // * 2.
+    // ? 2.
     locker: Option<i32>,
 }
 

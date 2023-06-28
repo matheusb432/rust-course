@@ -13,7 +13,9 @@
 // * It is not necessary to have data fields or function implementations
 //   for the vehicle bodies/colors
 
-// * 1.
+#![allow(dead_code)]
+
+// ? 1.
 #[derive(Debug)]
 struct Vehicle<B, C>
 where
@@ -29,7 +31,7 @@ where
     B: Body,
     C: Color,
 {
-    // * 3.
+    // ? 3.
     pub fn new(body: B, color: C) -> Self {
         Self { body, color }
     }
@@ -38,7 +40,7 @@ where
 trait Body {}
 trait Color {}
 
-// * 2.
+// ? 2.
 #[derive(Debug)]
 struct Truck;
 impl Body for Truck {}
@@ -57,7 +59,7 @@ fn main() {
     let white_car = Vehicle::new(Car, White);
     let red_truck = Vehicle::new(Truck, Red);
 
-    // * 4.
+    // ? 4.
     dbg!(white_car);
     dbg!(red_truck);
 }

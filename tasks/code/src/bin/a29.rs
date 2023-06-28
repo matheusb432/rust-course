@@ -9,6 +9,8 @@
 // * Use the debug token "{:?}" to print out the information
 // * Use the compiler to guide you to the correct generic constraints needed
 
+#![allow(dead_code)]
+
 use std::fmt::Debug;
 
 #[derive(Debug)]

@@ -16,7 +16,9 @@
 //   * For the Ok variant, print any message you want
 //   * For the Err variant, print out the error message
 
-// * 1.
+#![allow(dead_code)]
+
+// ? 1.
 #[derive(Debug)]
 struct Adult {
     age: u8,
@@ -24,7 +26,7 @@ struct Adult {
 }
 
 impl Adult {
-    // * 2.
+    // ? 2.
     fn new(name: &str, age: u8) -> Result<Self, &str> {
         if age >= 21 {
             return Ok(Self {
@@ -38,11 +40,11 @@ impl Adult {
 }
 
 fn main() {
-    // * 3.
+    // ? 3.
     let adult = Adult::new("Adult", 22);
     let underage = Adult::new("Not adult", 20);
 
-    // * 4.
+    // ? 4.
     for item in [&adult, &underage] {
         match item {
             Ok(data) => println!("{:?}", data),

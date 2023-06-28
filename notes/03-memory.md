@@ -34,7 +34,7 @@ enum Light {
     Dull,
 }
 
-// NOTE any function that owns data is required to delete it once it completes, this means that light will be deleted in memory once the function finishes
+// Any function that owns data is required to delete it once it completes, this means that light will be deleted in memory once the function finishes
 fn display_light(light: Light) {
     match light {
         Light::Bright => println!("Bright"),
@@ -42,11 +42,11 @@ fn display_light(light: Light) {
     }
 }
 
-// NOTE dull is owned by the main function
+// Dull is owned by the main function
 let dull = Light::Dull;
-// NOTE passing dull as an argument will "move" it to the display_light function
+// Passing dull as an argument will "move" it to the display_light function
 display_light(dull);
-// NOTE This will NOT compile, dull has already been deleted in memory
+// This will NOT compile, dull has already been deleted in memory
 display_light(dull);
 ```
 
@@ -55,14 +55,12 @@ display_light(dull);
 When a value is borrowed, the ownership is not transferred, but the borrower is allowed to use the value for a limited time, and it will not take responsibility for deleting the data.
 
 ```rust
-
-
 enum Light {
     Bright,
     Dull,
 }
 
-// NOTE the `&` symbol indicates that the function is borrowing data, rather than taking ownership of it
+// The `&` symbol indicates that the function is borrowing data, rather than taking ownership of it
 fn display_light(light: &Light) {
     match light {
         Light::Bright => println!("Bright"),
@@ -71,9 +69,9 @@ fn display_light(light: &Light) {
 }
 
 let dull = Light::Dull;
-// NOTE passing `&dull` will "borrow" it to the display_light function
+// Passing `&dull` will "borrow" it to the display_light function
 display_light(&dull);
-// NOTE This will work now since dull has not yet been deleted in memory
+// This works since dull has not yet been deleted in memory
 display_light(&dull);
 ```
 
@@ -163,3 +161,25 @@ let line = AssemblyLine {
     };
 }
 ```
+
+## Shared Ownership
+
+- Shared ownership is a way to have multiple owners of the same data.
+- It's useful when you want to share data between multiple parts of your program, but you don't want to have to worry about lifetimes.
+
+### Smart Pointers
+
+- Smart pointers are data structures that behave like pointers, but have additional metadata and capabilities.
+- They're useful for implementing shared ownership.
+- Reference counted pointers (`Rc`) are a type of smart pointer that keep track of the number of references to a piece of data in single-threaded programs.
+- Atomic reference counted pointers (`Arc`) are essentially `Rc` pointers that can be used in multi-threaded programs.
+- The data for these pointers is only dropped when all the owners have been dropped.
+
+### Interior Mutability
+
+- Interior mutability is a way to create permantenly mutable data. It has trade-offs in complexity and performance.
+- With `Cell`, accessing data results in a move or copy. Data must be copyable and ideally should be cheap to move (such as numbers or booleans).
+- With `RefCell`, accessing data results in a borrow. It has efficient data access when compared to `Cell`.
+  - It's borrow checked at runtime, so it can cause panics.
+- Both `Cell` and `RefCell` are NOT thread safe.
+- In general, `mut` and `&mut` is preferred over interior mutability.
