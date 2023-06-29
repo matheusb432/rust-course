@@ -1,5 +1,10 @@
 # Misc
 
+## Async vs Multithreaded
+
+- In general, async code is preferred when there are a large amount of tasks that are waiting on I/O, and multithreaded code is preferred when there are heavy CPU tasks.
+- Async cannot run in parallel, but multithreaded code can.
+
 ## Useful Cargo Crates
 
 ### Clippy

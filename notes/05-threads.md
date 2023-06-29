@@ -1,11 +1,9 @@
-# Threads and Async Code in Rust 🦀
-
-## Threads
+# Threads in Rust 🦀
 
 - Threads are a way to run multiple pieces of code at the same time. Rust's standard library provides a thread implementation with safety guarantees.
 - Ending the main thread will terminate all spawned threads.
 
-### Spawning a Thread
+## Spawning a Thread
 
 Creating a new thread is done with the `thread::spawn` function, which takes a closure as an argument. The closure is the code that will be run on the new thread.
 
@@ -105,7 +103,7 @@ fn recurse(
 }
 ```
 
-#### Thread Contentions
+### Thread Contentions
 
 - Contention is when multiple threads are trying to access the same data at the same time.
 - It can cause performance issues, so it's important to avoid it.
@@ -113,3 +111,17 @@ fn recurse(
   - When a thread tries to access data that's locked, it will wait for a random amount of time before trying again.
   - If it fails again, it will wait for a longer amount of time before trying again.
   - This continues until the thread is able to access the data.
+
+## Parallelization
+
+- Parallelization is a way to speed up programs by running multiple pieces of code at the same time with multiple threads.
+- It's useful for computationally expensive tasks, such as image processing or machine learning.
+- It's also useful for I/O bound tasks, such as network requests or file I/O.
+- While it can bring performance benefits for many instances, it can be actually slower for smaller, simpler tasks.
+
+### Parallelization Bottlenecks
+
+- Amdahl's Law states that the speedup of a program is limited by the amount of code that can be parallelized.
+- The overhead of creating and synchronizing threads can also limit the speedup of a program.
+- False Sharing: When threads frequently access and modify data that are located close to each other in memory, the constant invalidation of cache lines will cause performance issues.
+  - This can be fixed by padding the data so that they're not located close to each other in memory.
