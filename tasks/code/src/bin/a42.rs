@@ -18,8 +18,6 @@
 // * Use the .next() method to advance the iterator to confirm it works correctly
 // * Only the Iterator trait needs to be implemented for this activity
 
-struct Stage;
-
 struct Multiplier {
     powerup: usize,
     amount: usize,

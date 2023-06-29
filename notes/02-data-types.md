@@ -37,26 +37,43 @@ type GenericThings<T> = Vec<Thing<T>>;
 
 ## Struct
 
-A struct (structure) is a type that contain multiple fields to group similar data together, much like an object
+- A struct (structure) is a type that contain multiple fields to group similar data together, much like an object
+- It cannot have some pieces of data and not others
+- Structs cannot have borrowed `&` data, as they are responsible for cleaning up their data when they are dropped, and they cannot drop data that they don't own.
 
-It cannot have some pieces of data and not others.
+### Struct Update Syntax
 
-Structs cannot have borrowed `&` data, as they are responsible for cleaning up their data when they are dropped, and they cannot drop data that they don't own.
+- Struct update syntax is useful when you want to create a new instance of a struct that uses most of an old instance’s values but changes some.
 
 ```rust
-struct ShippingBox {
-    depth: i32,
-    width: i32,
-    height: i32,
+struct Particle {
+    color: (u8, u8, u8),
+    alpha: u8,
+    position: (f32, f32, f32),
+    // ... many, many more fields
 }
 
-let my_box = ShippingBox {
-    depth: 3,
-    width: 2,
-    height: 5,
-};
+impl Default for Particle {
+    fn default() -> Particle {
+        Particle {
+            color: (0, 0, 0),
+            alpha: 255,
+            position: (0.0, 0.0, 0.0),
+            // ...
+        }
+    }
+}
 
-println!(my_box.depth) // 3
+// Without struct update
+let mut particle = Particle::default();
+particle.alpha = 127;
+let particle = particle;
+
+// With struct update, will create a shallow copy of the struct
+let particle = Particle {
+    alpha: 127,
+    ..Particle::default()
+};
 ```
 
 ## Impl
@@ -359,4 +376,19 @@ let clickers = vec![kb, mouse];
 let kb = Box::new(Keyboard);
 let mouse = Box::new(Mouse);
 let clickers: Vec<Box<dyn Clicky>> = vec![kb, mouse];
+```
+
+## Turbofish
+
+- The turbofish is a syntax that can be used to specify the type of a generic function.
+- It's mostly optional due to type inference, but can be useful when the compiler is unable to infer the type.
+
+```rust
+// Generic function
+fn hello<T>(noisy: T) {
+    noisy.make_noise();
+}
+
+// Using the turbofish to specify the type
+hello::<Person>(Person {});
 ```
