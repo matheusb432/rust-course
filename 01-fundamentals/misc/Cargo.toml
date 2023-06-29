@@ -6,5 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+derive_more = "0.99.17"
 dotenvy = "0.15.7"
+rayon = "1.7.0"
 strum = {version = "0.25.0", features = ["derive"]}

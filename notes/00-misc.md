@@ -29,28 +29,23 @@
 - It also provides the `EnumIter` trait which allows you to iterate over the variants of an enum.
 - Mostly useful for parsing command line arguments.
 
-```rust
-use strum_macros::{EnumIter, EnumString, EnumVariantNames};
+### derive_more
 
-#[derive(Debug, EnumIter, EnumString, EnumVariantNames)]
-enum MyEnum {
-    Foo,
-    Bar,
-    Baz,
-}
-let my_enum = MyEnum::from_str("Foo").unwrap();
-println!("{:?}", my_enum); // Foo
-println!("{:?}", MyEnum::VARIANTS); // ["Foo", "Bar", "Baz"]
+- The `derive_more` crate is a crate that allows you to derive more traits for structs and enums.
+- It provides the `From` trait for enums, the `Add` trait for structs, and more.
 
-// Serialize string to enum
-#[derive(Debug, EnumString)]
-enum Status {
-    #[strum(serialize = "i", serialize = "Idle")]
-    Idle,
-    #[strum(serialize = "p")]
-    Processing,
-}
-let idle = Status::from_str("i"); // Ok(Status::Idle)
-let processing = Status::from_str("p"); // Ok(Status::Processing)
-let processing = Status::from_str("Processing"); // Err(NotFound)
-```
+### rayon
+
+- The `rayon` crate is a crate that allows you to easily parallelize code, with automatic multithreading.
+- No boilerplate needed to enable parallel processing.
+- Automatically users all processing cores available on the machine
+
+### tracing
+
+- The `tracing` crate is a crate that allows you to instrument your code with tracing events.
+- It is useful for logging, debugging and performance analysis.
+
+### color-eyre
+
+- The `color-eyre` crate is a crate that allows you to easily standardize error handling in your code.
+- It is useful for debugging and logging.
