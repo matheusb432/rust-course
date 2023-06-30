@@ -2,7 +2,7 @@ use super::ClipErr;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, PartialOrd)]
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, PartialOrd)]
 pub struct Password(Option<String>);
 
 impl Password {
@@ -12,15 +12,11 @@ impl Password {
         let value: Option<String> = value.into();
 
         match value {
-            Some(value) => {
+            Some(value) if !value.trim().is_empty() => {
                 // TODO add validation and return an appropriate ClipErr
-                if !value.trim().is_empty() {
-                    Ok(Self(Some(value)))
-                } else {
-                    Ok(Self(None))
-                }
+                Ok(Self(Some(value)))
             }
-            None => Ok(Self(None)),
+            _ => Ok(Self(None)),
         }
     }
 
@@ -30,12 +26,6 @@ impl Password {
 
     pub fn has_password(&self) -> bool {
         self.0.is_some()
-    }
-}
-
-impl Default for Password {
-    fn default() -> Self {
-        Self(None)
     }
 }
 

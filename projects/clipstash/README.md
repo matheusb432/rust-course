@@ -34,7 +34,12 @@ Clipstash is a fullstack app composed of Web, Service, Data and Domain layers
   - Data access
 - No logic outside of queries
 
-### Domain
+### Domain Layer
 
 - Contains data types that are shared between all layers
 - Enforces business rules on data, domain objects cannot be created unless all rules pass
+
+#### Field Structs
+
+- Field structs are used to validate data before it is stored in the database
+- Every field for the `Clip` structure is a module, this guarantees that all data is valid before it is stored in the database, and splits the code into smaller, more manageable chunks, even with extensive validation logic
