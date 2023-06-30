@@ -8,3 +8,5 @@
 - [ ] a32 refactor
   - [ ] get_orders function should initialize the hash map succinctly
   - [ ] get_indexes should not need the entire vector slice
+- [ ] clipstash refactor
+  - [ ] Refactor clip id type to use `Id(Arc<str>)` instead of `Id(String)`

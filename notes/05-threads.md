@@ -46,6 +46,8 @@ handle.join();
 - They're useful for implementing shared ownership.
 - Reference counted pointers (`Rc`) are a type of smart pointer that keep track of the number of references to a piece of data in single-threaded programs.
 - Atomic reference counted pointers (`Arc`) are essentially `Rc` pointers that can be used in multi-threaded programs.
+  - Cloning an `Arc` happens in O(1) time, since it only copies the pointer itself.
+  - An `Arc[T]` can be a much faster alternative to `Vec<T>` for immutable data (e.g. cloning a `Arc<str>` is much faster than cloning a `String`)
 - The data for these pointers is only dropped when all the owners have been dropped.
 
 ### Interior Mutability

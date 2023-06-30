@@ -33,9 +33,7 @@ for num in numbers.into_iter() {
 
 ## Vector
 
-Vectors allow you to store lists of data. Vectors can only store values of the same type.
-
-Can add, remove, update elements.
+Vectors allow you to store dynamic, mutable lists of data. Vectors can only store values of the same type.
 
 ```rust
 // The vec! macro expands to something similar to creating the vector and pushing the values into it
@@ -55,7 +53,6 @@ let two = my_numbers[1];
 for num in my_numbers {
     println!("{:?}", num);
 }
-
 ```
 
 ## String and &str

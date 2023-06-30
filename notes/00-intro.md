@@ -27,3 +27,10 @@ A foundational goal of Rust is to ensure that your programs never have undefined
   - rustfmt: code formatter
   - rustdoc: documentation generator
   - rustup: toolchain manager
+
+## Common Pitfalls
+
+### Sentinel Values
+
+- Sentinel values are values that are used to represent an error state, such as `-1` when a value is not found.
+- Since Rust provides the `Result` and `Option` types, sentinel values are an anti-pattern and should never be used.

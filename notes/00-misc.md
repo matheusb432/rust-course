@@ -5,12 +5,19 @@
 - In general, async code is preferred when there are a large amount of tasks that are waiting on I/O, and multithreaded code is preferred when there are heavy CPU tasks.
 - Async cannot run in parallel, but multithreaded code can.
 
+## `Vec<T>` vs `Arc<[T]>` vs `Box<[T]>`
+
+- `Vec<T>` and `String` are types most appropriate for modifying buffers, when a data collection is immutable after creation, `Arc<[T]>` and `Arc<str>` are more appropriate and faster.
+- The operation of cloning a `String` or `Vec<T>` runs at O(n) time, since it copies the entire buffer, while cloning an `Arc<[T]>` or `Arc<str>` runs at O(1) time, since it only copies the pointer itself.
+- If the data does not need to be shared, `Box<[T]>` and `Box<str>` can be even faster.
+
 ## Useful Cargo Crates
 
 ### Clippy
 
 - Clippy is a linter for Rust
 - Running `cargo clippy --bin {binary file name}` will lint code in a binary file
+- To lint the entire project, run `cargo clippy --all-targets`
 
 ### dotenvy
 
@@ -54,3 +61,24 @@
 
 - The `color-eyre` crate is a crate that allows you to easily standardize error handling in your code.
 - It is useful for debugging and logging.
+
+## Useful Macros
+
+### `matches!`
+
+- The `matches!` macro is a macro that allows you to match against multiple patterns at once, returning `true` if any of the patterns match.
+- It is useful for matching against multiple variants of an enum.
+
+```rust
+enum Mouse {
+    LeftClick,
+    RightClick,
+    MiddleClick,
+}
+
+let mouse = Mouse::LeftClick;
+
+if matches!(mouse, Mouse::LeftClick | Mouse::RightClick) {
+    println!("Mouse clicked");
+}
+```
