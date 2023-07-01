@@ -11,7 +11,7 @@ Clipstash is a fullstack app composed of Web, Service, Data and Domain layers
   2. Model - Data layer
   3. Ask - Service layer
 
-### Web Component Layer
+### Web Layer
 
 - Exposes the application to the outside world
 - Responsible for:
@@ -19,9 +19,23 @@ Clipstash is a fullstack app composed of Web, Service, Data and Domain layers
   - Rendering pages
   - Providing the API
 - Will manage application state
+
   - Establish database connections
   - Port bindings
   - Spawning background tasks
+
+#### Templates
+
+- The web layer utilizes templates to render pages
+  - Templates are HTML with additional syntax to allow the server to inject data into the page
+  - Handlebars is used as the templating engine
+  - The server provides data for template rendering which is specified via `contexts`
+
+#### Contexts
+
+- Each web page has a dedicated context, which is variable data that is injected into the template
+- Contexts are similar to `HashMaps`
+- Rust data structures can be converted to contexts via the `serde` crate by implementing the `Debug` and `Serialize` trait
 
 ### Service Layer
 
