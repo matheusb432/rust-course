@@ -27,7 +27,6 @@ impl From<DataErr> for ServiceErr {
 }
 
 impl From<sqlx::Error> for ServiceErr {
-    // TODO refactor to be used in From<DataErr> impl?
     fn from(err: sqlx::Error) -> Self {
         match err {
             sqlx::Error::RowNotFound => Self::NotFound,

@@ -12,10 +12,7 @@ impl Password {
         let value: Option<String> = value.into();
 
         match value {
-            Some(value) if !value.trim().is_empty() => {
-                // TODO add validation and return an appropriate ClipErr
-                Ok(Self(Some(value)))
-            }
+            Some(value) if !value.trim().is_empty() => Ok(Self(Some(value))),
             _ => Ok(Self(None)),
         }
     }
@@ -26,6 +23,10 @@ impl Password {
 
     pub fn has_password(&self) -> bool {
         self.0.is_some()
+    }
+
+    pub fn is_valid(&self, other: &Self) -> bool {
+        !self.has_password() || self == other
     }
 }
 

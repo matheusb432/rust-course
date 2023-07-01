@@ -24,7 +24,6 @@ impl<'a> Renderer<'a> {
     {
         let mut value = Self::convert_to_value(&context);
         if let Some(value) = value.as_object_mut() {
-            // TODO refactor the values, is `into()` necessary?
             value.insert("_errors".into(), errors.into());
             value.insert("_title".into(), context.title().into());
             value.insert("_base".into(), context.parent().into());
@@ -32,7 +31,6 @@ impl<'a> Renderer<'a> {
         self.do_render(context.template_path(), value)
     }
 
-    // TODO refactor so that `render` and `render_with_data` don't duplicate logic
     pub fn render_with_data<P, D>(&self, context: P, data: (&str, D), errors: &[&str]) -> String
     where
         P: ctx::PageContext + serde::Serialize + std::fmt::Debug,
@@ -42,7 +40,6 @@ impl<'a> Renderer<'a> {
 
         let mut value = Self::convert_to_value(&context);
         if let Some(value) = value.as_object_mut() {
-            // TODO refactor the values, is `into()` necessary?
             value.insert("_errors".into(), errors.into());
             value.insert("_title".into(), context.title().into());
             value.insert("_base".into(), context.parent().into());
@@ -62,5 +59,19 @@ impl<'a> Renderer<'a> {
         S: serde::Serialize + std::fmt::Debug,
     {
         serde_json::to_value(serializable).expect("failed to convert struct to value")
+    }
+
+    // TODO test & replace in render fns
+    fn get_base_value<P>(context: P, errors: &[&str]) -> Option<serde_json::Value>
+    where
+        P: ctx::PageContext + serde::Serialize + std::fmt::Debug,
+    {
+        let mut value = Self::convert_to_value(&context);
+        let map = value.as_object_mut()?;
+        // TODO refactor the values, is `into()` necessary?
+        map.insert("_errors".into(), errors.into());
+        map.insert("_title".into(), context.title().into());
+        map.insert("_base".into(), context.parent().into());
+        Some(value)
     }
 }

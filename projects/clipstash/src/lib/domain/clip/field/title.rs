@@ -17,7 +17,6 @@ impl Title {
         match value.trim().len() {
             0 => Ok(Self(None)),
             1..=200 => Ok(Self(Some(value.to_owned()))),
-            // TODO refactor to not need Err() wrapper?
             _ => Err(ClipErr::InvalidTitle("title too large".to_owned())),
         }
     }

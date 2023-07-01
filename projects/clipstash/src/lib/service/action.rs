@@ -12,16 +12,12 @@ type ActionResult<T> = Result<T, ServiceErr>;
 pub async fn get_clip(req: ask::GetClip, pool: &DatabasePool) -> ActionResult<Clip> {
     let user_password = req.password.clone();
     let clip: Clip = query::get_clip(req, pool).await?.try_into()?;
+    let Clip { password, .. } = &clip;
 
-    // TODO refactor to be cleaner
-    if clip.password.has_password() {
-        if clip.password == user_password {
-            Ok(clip)
-        } else {
-            Err(ServiceErr::PermissionErr("Invalid password".to_owned()))
-        }
-    } else {
+    if password.is_valid(&user_password) {
         Ok(clip)
+    } else {
+        Err(ServiceErr::PermissionErr("Invalid password".to_owned()))
     }
 }
 

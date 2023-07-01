@@ -25,13 +25,15 @@ impl Default for Expires {
 impl FromStr for Expires {
     type Err = ClipErr;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.is_empty() {
-            return Ok(Self(None));
-        }
-
-        match Time::from_str(s) {
-            Ok(time) => Ok(Self(Some(time))),
-            Err(e) => Err(e.into()),
-        }
+        // NOTE transpose() maps Ok(Some(x)) to Some(Ok(x))
+        let time = (!s.is_empty()).then(|| Time::from_str(s)).transpose()?;
+        Ok(Self(time))
     }
+    // ? from_str() is equivalent to this:
+    // * let time = if !s.is_empty() {
+    // *     Some(Time::from_str(s)?)
+    // * } else {
+    // *     None
+    // * };
+    // * Ok(Self(time))
 }
