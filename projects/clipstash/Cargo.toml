@@ -17,3 +17,4 @@ thiserror = "1.0.40"
 uuid = {version = "1.4.0", features = ["serde", "v4"]}
 derive_more = "0.99"
 rand = "0.8.5"
+sqlx = {version = "0.5.8", features = ["sqlite", "runtime-tokio-rustls", "macros", "chrono", "uuid"]}
