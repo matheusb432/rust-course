@@ -1,7 +1,7 @@
 pub mod model;
 pub mod query;
 
-use std::str::FromStr;
+use std::{fmt::format, str::FromStr};
 
 use derive_more::{Display, From};
 use serde::{Deserialize, Serialize};
@@ -53,6 +53,12 @@ impl DbId {
 
     pub fn nil() -> Self {
         Self(Uuid::nil())
+    }
+}
+
+impl From<DbId> for String {
+    fn from(value: DbId) -> Self {
+        format!("{}", value.0)
     }
 }
 

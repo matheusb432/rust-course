@@ -4,6 +4,7 @@ pub mod service;
 pub mod web;
 
 // NOTE re-exporting common modules
+pub use data::DataErr;
 pub use domain::clip::field::Shortcode;
 pub use domain::clip::ClipErr;
 pub use domain::time::Time;
