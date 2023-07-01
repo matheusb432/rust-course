@@ -1,4 +1,5 @@
 pub mod model;
+pub mod query;
 
 use std::str::FromStr;
 
@@ -27,8 +28,7 @@ impl Database<Sqlite> {
         let pool = sqlx::sqlite::SqlitePoolOptions::new()
             .connect(connection_str)
             .await
-            .unwrap_or_else(|e| Self::handle_connection_error(e))
-            .into();
+            .unwrap_or_else(|e| Self::handle_connection_error(e));
         Self(pool)
     }
 

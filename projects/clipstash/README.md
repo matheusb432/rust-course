@@ -5,7 +5,11 @@ Final project for the course
 ## Architecture
 
 Clipstash is a fullstack app composed of Web, Service, Data and Domain layers
-// TODO: is it basically Domain-driven design?
+
+- The terminology for the models is as follows:
+  1. Domain - Business logic
+  2. Model - Data layer
+  3. Ask - Service layer
 
 ### Web Component Layer
 

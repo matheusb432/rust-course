@@ -17,7 +17,10 @@
 
 - Clippy is a linter for Rust
 - Running `cargo clippy --bin {binary file name}` will lint code in a binary file
-- To lint the entire project, run `cargo clippy --all-targets`
+- To lint the entire project, run:
+  `cargo clippy --all-targets`
+- To fix all lints automatically, run:
+  `cargo clippy --fix --workspace --all-targets --allow-staged`
 
 ### dotenvy
 
