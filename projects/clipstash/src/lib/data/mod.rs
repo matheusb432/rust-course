@@ -1,7 +1,7 @@
 pub mod model;
 pub mod query;
 
-use std::{fmt::format, str::FromStr};
+use std::str::FromStr;
 
 use derive_more::{Display, From};
 use serde::{Deserialize, Serialize};

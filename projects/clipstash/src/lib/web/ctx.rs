@@ -1,6 +1,6 @@
 use derive_more::Constructor;
 // NOTE All of the context data must be serializable to a hashmap to be sent to the template renderer
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 pub trait PageContext {
     /// * The page title
@@ -16,13 +16,8 @@ pub trait PageContext {
 
 #[derive(Debug, Serialize)]
 // NOTE `{}` is necessary so this serializes properly
+#[derive(Default)]
 pub struct Home {}
-
-impl Default for Home {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 impl PageContext for Home {
     fn template_path(&self) -> &str {
