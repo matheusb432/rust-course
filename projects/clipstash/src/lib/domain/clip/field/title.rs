@@ -1,13 +1,14 @@
 use std::str::FromStr;
 
 use super::ClipErr;
+use rocket::form::{self, FromFormField, ValueField};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize)]
 pub struct Title(Option<String>);
 
 impl Title {
-    pub fn new<T: Into<Option<String>>>(value: T) -> Result<Title, ClipErr> {
+    pub fn new<T: Into<Option<String>>>(value: T) -> Result<Self, ClipErr> {
         let value: Option<String> = value.into();
 
         let Some(value) = value else {
@@ -38,5 +39,13 @@ impl FromStr for Title {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::new(s.to_string())
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for Title {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        let res = Self::new(field.value.to_owned());
+        Ok(res.map_err(|e| form::Error::validation(format!("{}", e)))?)
     }
 }

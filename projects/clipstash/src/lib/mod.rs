@@ -8,3 +8,23 @@ pub use data::DataErr;
 pub use domain::clip::field::Shortcode;
 pub use domain::clip::ClipErr;
 pub use domain::time::Time;
+pub use service::ServiceErr;
+
+use data::AppDatabase;
+use rocket::{fs::FileServer, Build, Rocket};
+use web::renderer::Renderer;
+
+pub fn rocket(config: RocketConfig) -> Rocket<Build> {
+    rocket::build()
+        .manage::<AppDatabase>(config.database)
+        .manage::<Renderer>(config.renderer)
+        .mount("/", web::http::routes())
+        // ? "static" refers to the /static folder in the root of our crate
+        .mount("/static", FileServer::from("static"))
+        .register("/", web::http::catcher::catchers())
+}
+
+pub struct RocketConfig {
+    pub renderer: Renderer<'static>,
+    pub database: AppDatabase,
+}

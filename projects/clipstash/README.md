@@ -2,6 +2,19 @@
 
 Final project for the course
 
+## Requirements
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+
+## Running
+
+To run the application, run the following command:
+
+```bash
+cargo run --bin httpd
+```
+
 ## Architecture
 
 Clipstash is a fullstack app composed of Web, Service, Data and Domain layers
@@ -61,3 +74,8 @@ Clipstash is a fullstack app composed of Web, Service, Data and Domain layers
 
 - Field structs are used to validate data before it is stored in the database
 - Every field for the `Clip` structure is a module, this guarantees that all data is valid before it is stored in the database, and splits the code into smaller, more manageable chunks, even with extensive validation logic
+
+## Rocket
+
+- Rocket is a web framework for Rust, it's an asynchronous web server that supports cookies, forms and encryption
+- It handles state management, routing, templating, and has built-in testing mechanism

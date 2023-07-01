@@ -1,4 +1,5 @@
 use super::ClipErr;
+use rocket::form::{self, FromFormField, ValueField};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -34,5 +35,14 @@ impl FromStr for Password {
     type Err = ClipErr;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::new(s.to_owned())
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for Password {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        let res = Self::new(field.value.to_owned());
+        // TODO refactor map_err closure into a function
+        Ok(res.map_err(|e| form::Error::validation(format!("{}", e)))?)
     }
 }

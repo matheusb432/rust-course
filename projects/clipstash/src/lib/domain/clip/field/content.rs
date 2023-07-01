@@ -1,4 +1,5 @@
 use super::ClipErr;
+use rocket::form::{self, FromFormField, ValueField};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -20,5 +21,14 @@ impl Content {
 
     pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for Content {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        let res = Self::new(field.value);
+        // NOTE map_err() is used to convert the error type from ClipErr to form::Error
+        Ok(res.map_err(|e| form::Error::validation(format!("{}", e)))?)
     }
 }

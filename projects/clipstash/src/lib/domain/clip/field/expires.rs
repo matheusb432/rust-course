@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use super::ClipErr;
 use crate::domain::time::Time;
+use rocket::form::{self, FromFormField, ValueField};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -26,6 +27,7 @@ impl FromStr for Expires {
     type Err = ClipErr;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // NOTE transpose() maps Ok(Some(x)) to Some(Ok(x))
+        // NOTE .then() is lazily evaluated so it's preferrable to .then_some() as Time::from_str() is a function call
         let time = (!s.is_empty()).then(|| Time::from_str(s)).transpose()?;
         Ok(Self(time))
     }
@@ -36,4 +38,16 @@ impl FromStr for Expires {
     // *     None
     // * };
     // * Ok(Self(time))
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for Expires {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        if field.value.trim().is_empty() {
+            return Ok(Self(None));
+        }
+
+        let res = Self::from_str(field.value);
+        Ok(res.map_err(|e| form::Error::validation(format!("{}", e)))?)
+    }
 }

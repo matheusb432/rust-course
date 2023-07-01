@@ -7,8 +7,8 @@ edition = "2021"
 
 [lib]
 name = "clipstash"
-path = "src/lib/mod.rs"
-
+path = "src/lib/mod.rs" 
+      
 [dependencies]
 chrono = {version = "0.4.26", features = ["serde"]}
 serde = { version = "1.0", features = ["derive"] }
@@ -19,3 +19,7 @@ derive_more = "0.99"
 rand = "0.8.5"
 sqlx = {version = "0.5.8", features = ["sqlite", "runtime-tokio-rustls", "macros", "chrono", "uuid"]}
 handlebars = {version = "4.3.7", features = ["dir_source"]}
+rocket = {version = "0.5.0-rc.1", features = ["json"]}
+structopt = "0.3"
+dotenv = "0.15"
+tokio = "1.8.0"
