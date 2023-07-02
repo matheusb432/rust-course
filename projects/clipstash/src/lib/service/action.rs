@@ -1,3 +1,4 @@
+use crate::web::api::ApiKey;
 use crate::{
     data::{query, DatabasePool, Transaction},
     domain::Clip,
@@ -46,4 +47,20 @@ pub async fn new_clip(req: ask::NewClip, pool: &DatabasePool) -> Result<Clip> {
 
 pub async fn update_clip(req: ask::UpdateClip, pool: &DatabasePool) -> Result<Clip> {
     Ok(query::update_clip(req, pool).await?.try_into()?)
+}
+
+pub async fn generate_api_key(pool: &DatabasePool) -> Result<ApiKey> {
+    let api_key = ApiKey::new();
+    Ok(query::save_api_key(api_key, pool).await?)
+}
+
+pub async fn revoke_api_key(
+    api_key: ApiKey,
+    pool: &DatabasePool,
+) -> Result<query::RevocationStatus> {
+    Ok(query::revoke_api_key(api_key, pool).await?)
+}
+
+pub async fn api_key_is_valid(api_key: ApiKey, pool: &DatabasePool) -> Result<bool> {
+    Ok(query::api_key_is_valid(api_key, pool).await?)
 }

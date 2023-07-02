@@ -21,6 +21,8 @@ enum HitCountMsg {
     Hit(Shortcode, u32),
 }
 
+// TODO add result type alias for Result<(), HitCountErr>
+
 // NOTE The hit store type is a thread-safe, reference-counted, mutex-protected hashmap
 type HitStore = Arc<Mutex<HashMap<Shortcode, u32>>>;
 
@@ -29,6 +31,8 @@ pub struct HitCounter {
 }
 
 impl HitCounter {
+    /// Will commit the current hit counts to the database every 5 seconds after the channel is empty
+    /// NOTE The performance gain from batching the hits is significant, from 400 RPS to 45000 RPS
     pub fn new(pool: DatabasePool, handle: Handle) -> Self {
         let (tx, rx) = unbounded::<HitCountMsg>();
         let tx_clone = tx.clone();
@@ -46,7 +50,15 @@ impl HitCounter {
                             eprintln!("hit counter error: {e}");
                         }
                     }
-                    Err(e) => todo!(),
+                    Err(e) => match e {
+                        TryRecvError::Empty => {
+                            std::thread::sleep(Duration::from_secs(5));
+                            if let Err(e) = tx_clone.send(HitCountMsg::Commit) {
+                                eprintln!("error sending commit msg to hits channel: {e}");
+                            }
+                        }
+                        _ => break,
+                    },
                 }
             }
         });
@@ -61,6 +73,7 @@ impl HitCounter {
         }
     }
 
+    /// Commit the hits to the database and clears the hit store
     fn commit_hits(hits: HitStore, handle: Handle, pool: DatabasePool) -> Result<(), HitCountErr> {
         // ? Desugars to Arc::clone(&hits)
         let hits = hits.clone();
@@ -99,7 +112,7 @@ impl HitCounter {
                 // ? Equivalent to the above code
                 hitcount
                     .entry(shortcode)
-                    .and_modify(|hc| *hc += 1)
+                    .and_modify(|hc| *hc += count)
                     .or_insert(0);
             }
         };

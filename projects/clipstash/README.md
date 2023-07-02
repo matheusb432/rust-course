@@ -9,11 +9,40 @@ Final project for the course
 
 ## Running
 
+### Web Server
+
 To run the application, run the following command:
 
 ```bash
 cargo run --bin httpd
 ```
+
+### Database
+
+The database is managed by SQLx, to install the CLI run:
+
+```bash
+cargo install sqlx-cli
+```
+
+To add a new migration run:
+
+```bash
+sqlx migrate add <name>
+```
+
+To apply the migrations run:
+
+```bash
+sqlx migrate run
+```
+
+## Main Features
+
+- User authentication
+- API Key authentication
+- Clip management
+- Clip hit tracking via multithreaded background tasks
 
 ## Architecture
 

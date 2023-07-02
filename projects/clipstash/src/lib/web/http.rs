@@ -15,7 +15,7 @@ use rocket::{
 use serde::Serialize;
 use serde_json::value;
 
-use super::renderer::Renderer;
+use super::{hitcounter::HitCounter, renderer::Renderer};
 
 #[rocket::get("/")]
 fn home(renderer: &State<Renderer<'_>>) -> RawHtml<String> {
@@ -77,6 +77,7 @@ pub async fn new_clip(
 pub async fn get_clip(
     shortcode: Shortcode,
     database: &State<AppDatabase>,
+    hit_counter: &State<HitCounter>,
     renderer: &State<Renderer<'_>>,
 ) -> Result<status::Custom<RawHtml<String>>, PageErr> {
     // TODO refactor to closure? Type alias for the return?
@@ -96,6 +97,9 @@ pub async fn get_clip(
 
     match action::get_clip(shortcode.clone().into(), database.get_pool()).await {
         Ok(clip) => {
+            // * Adding a hit when the clip is viewed
+            hit_counter.hit(shortcode.clone(), 1);
+
             let context = ctx::ViewClip::new(clip);
             render_with_status(Status::Ok, context, renderer)
         }
@@ -115,6 +119,7 @@ pub async fn submit_clip_password(
     cookies: &CookieJar<'_>,
     form: Form<Contextual<'_, form::GetPasswordProtectedClip>>,
     shortcode: Shortcode,
+    hit_counter: &State<HitCounter>,
     database: &State<AppDatabase>,
     renderer: &State<Renderer<'_>>,
 ) -> Result<RawHtml<String>, PageErr> {
@@ -125,6 +130,8 @@ pub async fn submit_clip_password(
         };
         match action::get_clip(req, database.get_pool()).await {
             Ok(clip) => {
+                // * Adding a hit when the clip is viewed
+                hit_counter.hit(shortcode.clone(), 1);
                 let context = ctx::ViewClip::new(clip);
                 cookies.add(Cookie::new(
                     PASSWORD_COOKIE,
@@ -154,12 +161,13 @@ pub async fn submit_clip_password(
 #[rocket::get("/clip/raw/<shortcode>")]
 pub async fn get_raw_clip(
     cookies: &CookieJar<'_>,
-    shortcode: &str,
+    shortcode: Shortcode,
+    hit_counter: &State<HitCounter>,
     database: &State<AppDatabase>,
 ) -> Result<status::Custom<String>, Status> {
     use crate::domain::clip::field::Password;
     let req = service::ask::GetClip {
-        shortcode: shortcode.into(),
+        shortcode: shortcode.clone(),
         password: cookies
             .get(PASSWORD_COOKIE)
             .map(|cookie| cookie.value())
@@ -168,7 +176,10 @@ pub async fn get_raw_clip(
             .unwrap_or_else(Password::default),
     };
     match action::get_clip(req, database.get_pool()).await {
-        Ok(clip) => Ok(status::Custom(Status::Ok, clip.content.into_inner())),
+        Ok(clip) => {
+            hit_counter.hit(shortcode.clone(), 1);
+            Ok(status::Custom(Status::Ok, clip.content.into_inner()))
+        }
         Err(e) => match e {
             ServiceErr::PermissionErr(msg) => Ok(status::Custom(Status::Unauthorized, msg)),
             ServiceErr::NotFound => Err(Status::NotFound),
