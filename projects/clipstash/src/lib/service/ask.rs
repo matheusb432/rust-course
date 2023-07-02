@@ -42,6 +42,19 @@ pub struct NewClip {
     pub password: field::Password,
 }
 
+use crate::web::form;
+
+impl From<form::NewClip> for NewClip {
+    fn from(value: form::NewClip) -> Self {
+        Self {
+            content: value.content,
+            title: value.title,
+            expires: value.expires,
+            password: value.password,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UpdateClip {
     pub shortcode: field::Shortcode,
