@@ -2,7 +2,7 @@ use crate::{
     data::AppDatabase,
     domain::clip,
     service::{self, action},
-    web::{ctx, form, renderer::RenderErr, PageErr},
+    web::{ctx, form, renderer::RenderErr, PageErr, PASSWORD_COOKIE},
     ServiceErr, Shortcode,
 };
 use rocket::{
@@ -110,8 +110,75 @@ pub async fn get_clip(
     }
 }
 
+#[rocket::post("/clip/<shortcode>", data = "<form>")]
+pub async fn submit_clip_password(
+    cookies: &CookieJar<'_>,
+    form: Form<Contextual<'_, form::GetPasswordProtectedClip>>,
+    shortcode: Shortcode,
+    database: &State<AppDatabase>,
+    renderer: &State<Renderer<'_>>,
+) -> Result<RawHtml<String>, PageErr> {
+    if let Some(form) = &form.value {
+        let req = service::ask::GetClip {
+            shortcode: shortcode.clone(),
+            password: form.password.clone(),
+        };
+        match action::get_clip(req, database.get_pool()).await {
+            Ok(clip) => {
+                let context = ctx::ViewClip::new(clip);
+                cookies.add(Cookie::new(
+                    PASSWORD_COOKIE,
+                    form.password.clone().into_inner().unwrap_or_default(),
+                ));
+                Ok(RawHtml(renderer.render(context, &[])))
+            }
+            // TODO refactor since it's the same as get_clip error handling
+            Err(e) => match e {
+                ServiceErr::PermissionErr(e) => {
+                    let context = ctx::PasswordRequired::new(shortcode);
+                    Ok(RawHtml(renderer.render(context, &[e.as_str()])))
+                }
+                ServiceErr::NotFound => Err(PageErr::NotFound("clip not found".to_owned())),
+                _ => Err(PageErr::Internal("server error".to_owned())),
+            },
+        }
+    } else {
+        let context = ctx::PasswordRequired::new(shortcode);
+        Ok(RawHtml(renderer.render(
+            context,
+            &["A password is required to view this clip"],
+        )))
+    }
+}
+
+#[rocket::get("/clip/raw/<shortcode>")]
+pub async fn get_raw_clip(
+    cookies: &CookieJar<'_>,
+    shortcode: &str,
+    database: &State<AppDatabase>,
+) -> Result<status::Custom<String>, Status> {
+    use crate::domain::clip::field::Password;
+    let req = service::ask::GetClip {
+        shortcode: shortcode.into(),
+        password: cookies
+            .get(PASSWORD_COOKIE)
+            .map(|cookie| cookie.value())
+            .map(|raw_password| Password::new(raw_password.to_string()).ok())
+            .flatten()
+            .unwrap_or_else(Password::default),
+    };
+    match action::get_clip(req, database.get_pool()).await {
+        Ok(clip) => Ok(status::Custom(Status::Ok, clip.content.into_inner())),
+        Err(e) => match e {
+            ServiceErr::PermissionErr(msg) => Ok(status::Custom(Status::Unauthorized, msg)),
+            ServiceErr::NotFound => Err(Status::NotFound),
+            _ => Err(Status::InternalServerError),
+        },
+    }
+}
+
 pub fn routes() -> Vec<rocket::Route> {
-    rocket::routes![home, get_clip, new_clip]
+    rocket::routes![home, get_clip, new_clip, submit_clip_password, get_raw_clip]
 }
 
 pub mod catcher {
@@ -130,7 +197,7 @@ pub mod catcher {
     }
 
     #[catch(404)]
-    fn not_found(req: &Request) -> &'static str {
+    fn not_found(_: &Request) -> &'static str {
         "404"
     }
 
