@@ -235,6 +235,10 @@ mod my_module {
 }
 ```
 
+### Crates
+
+A crate can come in one of two forms: a binary crate or a library crate. A binary crate is an executable, and a library crate is a collection of code that can be imported into other crates.
+
 ## Overloading traits
 
 ### Equality & Ordering

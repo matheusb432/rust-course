@@ -6,6 +6,8 @@ Rust's goal is to compile programs into efficient binaries that require as few r
 
 A foundational goal of Rust is to ensure that your programs never have undefined behavior. That is the meaning of "safety." Undefined behavior is especially dangerous for low-level programs with direct access to memory. About 70% of reported security vulnerabilities in low-level systems are caused by memory corruption, which is one form of undefined behavior.
 
+Rust doesn't have `null` as it uses the `Option<T>` type, which is much more effective in preventing extremely common bugs.
+
 ## Why Rust?
 
 - High-level language features without compromising performance

@@ -99,6 +99,10 @@ let rect1 = Rectangle { width: 30, height: 50 };
 println!("The area of the rectangle is {} square pixels.", rect1.area());
 ```
 
+## Blanket Implementations
+
+Implementations of a trait on any type that satisfies the trait bounds are called `blanket implementations` and are extensively used in the Rust standard library. For example, the standard library implements the ToString trait on any type that implements the Display trait.
+
 ## Option
 
 Option is a type that can either be some data of a specified type, or nothing
