@@ -1,7 +1,26 @@
 use super::model::{self, GetClip, UpdateClip};
-use crate::data::{model::NewClip, DataErr, DatabasePool};
+use crate::{
+    data::{model::NewClip, DataErr, DatabasePool},
+    Shortcode,
+};
 
 type Result<T> = std::result::Result<T, DataErr>;
+
+pub async fn increase_hit_count(
+    shortcode: &Shortcode,
+    hits: u32,
+    pool: &DatabasePool,
+) -> Result<()> {
+    let shortcode = shortcode.as_str();
+    Ok(sqlx::query!(
+        "UPDATE clips SET hits = hits + ? WHERE shortcode = ?",
+        hits,
+        shortcode
+    )
+    .execute(pool)
+    .await
+    .map(|_| ())?)
+}
 
 // NOTE M accepts any type that implements the Into trait for the GetClip struct
 pub async fn get_clip<M: Into<model::GetClip>>(
