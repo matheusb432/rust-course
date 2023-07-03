@@ -22,13 +22,10 @@ impl<'a> Renderer<'a> {
     where
         P: ctx::PageContext + serde::Serialize + std::fmt::Debug,
     {
-        let mut value = Self::convert_to_value(&context);
-        if let Some(value) = value.as_object_mut() {
-            value.insert("_errors".into(), errors.into());
-            value.insert("_title".into(), context.title().into());
-            value.insert("_base".into(), context.parent().into());
-        }
-        self.do_render(context.template_path(), value)
+        self.do_render(
+            context.template_path(),
+            Self::get_base_value(&context, errors).unwrap_or_default(),
+        )
     }
 
     pub fn render_with_data<P, D>(&self, context: P, data: (&str, D), errors: &[&str]) -> String
@@ -38,11 +35,8 @@ impl<'a> Renderer<'a> {
     {
         use handlebars::to_json;
 
-        let mut value = Self::convert_to_value(&context);
+        let mut value = Self::get_base_value(&context, errors).unwrap_or_default();
         if let Some(value) = value.as_object_mut() {
-            value.insert("_errors".into(), errors.into());
-            value.insert("_title".into(), context.title().into());
-            value.insert("_base".into(), context.parent().into());
             value.insert(data.0.into(), to_json(data.1));
         }
         self.do_render(context.template_path(), value)
@@ -61,14 +55,13 @@ impl<'a> Renderer<'a> {
         serde_json::to_value(serializable).expect("failed to convert struct to value")
     }
 
-    // TODO test & replace in render fns
-    fn get_base_value<P>(context: P, errors: &[&str]) -> Option<serde_json::Value>
+    fn get_base_value<P>(context: &P, errors: &[&str]) -> Option<serde_json::Value>
+    // TODO type alias for P?
     where
         P: ctx::PageContext + serde::Serialize + std::fmt::Debug,
     {
         let mut value = Self::convert_to_value(&context);
         let map = value.as_object_mut()?;
-        // TODO refactor the values, is `into()` necessary?
         map.insert("_errors".into(), errors.into());
         map.insert("_title".into(), context.title().into());
         map.insert("_base".into(), context.parent().into());

@@ -42,7 +42,6 @@ impl FromStr for Password {
 impl<'r> FromFormField<'r> for Password {
     fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
         let res = Self::new(field.value.to_owned());
-        // TODO refactor map_err closure into a function
-        Ok(res.map_err(|e| form::Error::validation(format!("{}", e)))?)
+        Ok(res.map_err(|e| form::Error::validation(format!("{e}")))?)
     }
 }

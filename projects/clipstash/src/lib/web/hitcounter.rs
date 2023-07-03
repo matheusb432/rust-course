@@ -21,7 +21,7 @@ enum HitCountMsg {
     Hit(Shortcode, u32),
 }
 
-// TODO add result type alias for Result<(), HitCountErr>
+type ModResult<T> = Result<T, HitCountErr>;
 
 // NOTE The hit store type is a thread-safe, reference-counted, mutex-protected hashmap
 type HitStore = Arc<Mutex<HashMap<Shortcode, u32>>>;
@@ -74,7 +74,7 @@ impl HitCounter {
     }
 
     /// Commit the hits to the database and clears the hit store
-    fn commit_hits(hits: HitStore, handle: Handle, pool: DatabasePool) -> Result<(), HitCountErr> {
+    fn commit_hits(hits: HitStore, handle: Handle, pool: DatabasePool) -> ModResult<()> {
         // ? Desugars to Arc::clone(&hits)
         let hits = hits.clone();
 
@@ -102,7 +102,7 @@ impl HitCounter {
         hits: HitStore,
         handle: Handle,
         pool: DatabasePool,
-    ) -> Result<(), HitCountErr> {
+    ) -> ModResult<()> {
         match msg {
             HitCountMsg::Commit => Self::commit_hits(hits.clone(), handle.clone(), pool.clone())?,
             HitCountMsg::Hit(shortcode, count) => {
