@@ -11,6 +11,35 @@
 - The operation of cloning a `String` or `Vec<T>` runs at O(n) time, since it copies the entire buffer, while cloning an `Arc<[T]>` or `Arc<str>` runs at O(1) time, since it only copies the pointer itself.
 - If the data does not need to be shared, `Box<[T]>` and `Box<str>` can be even faster.
 
+## `&Option<T>` and `Option<&T>`
+
+- `&Option<T>` is a reference to an `Option<T>`, while `Option<&T>` is an `Option` that contains a reference to a `T`.
+- `Option<&T>` is more useful, as it provides a more convenient API and better encapsulation.
+- `&Option<T>` is more restrictive, since it doesn't provide ownership of the `Option`, and requires ownership of the `T` to be passed in.
+
+```rust
+pub struct Data { /**/ }
+
+impl Data {
+  pub fn crunch(&self) -> i32 { 42 };
+}
+
+pub struct Widget(Option<Data>);
+
+impl Widget {
+  fn data_a(&self) -> &Option<Data> {
+      // Much more difficult to use
+      &self.0
+  }
+
+  fn data_b(&self) -> Option<&Data> {
+      // .as_ref() returns an Option<&T>
+      // Possible to filter the Data itself with .filter()
+      self.0.as_ref()
+  }
+}
+```
+
 ## Useful Cargo Crates
 
 ### Clippy
