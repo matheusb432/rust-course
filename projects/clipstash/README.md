@@ -14,7 +14,15 @@ Final project for the course
 To run the application, run the following command:
 
 ```bash
-cargo run --bin httpd
+cargo run -q --bin httpd
+```
+
+### CLI Client
+
+To run the CLI client and make a request to an endpoint, run the following command:
+
+```bash
+cargo run --bin client -- --api-key {generated api key} {subcommand and arguments}
 ```
 
 ### Database

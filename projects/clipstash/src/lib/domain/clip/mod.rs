@@ -23,6 +23,8 @@ pub enum ClipErr {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Clip {
+    // NOTE serde(skip) is used to prevent the field from being serialized on the Json() call
+    #[serde(skip)]
     pub clip_id: field::ClipId,
     pub shortcode: field::Shortcode,
     pub content: field::Content,

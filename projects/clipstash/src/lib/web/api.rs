@@ -1,5 +1,6 @@
 use crate::{
     data::AppDatabase,
+    domain::{self},
     service::{self, action},
     web::{hitcounter::HitCounter, PASSWORD_COOKIE},
     ServiceErr,
@@ -107,7 +108,6 @@ impl<'r> FromRequest<'r> for ApiKey {
                     Outcome::Success(db) => db,
                     _ => return server_error(),
                 };
-                // TODO refactor to `let else`
                 let api_key = match ApiKey::from_str(key) {
                     Ok(key) => key,
                     Err(e) => return key_error(e),
@@ -122,5 +122,107 @@ impl<'r> FromRequest<'r> for ApiKey {
                 }
             }
         }
+    }
+}
+
+// TODO refactor type alias for result
+
+#[rocket::get("/key")]
+pub async fn new_api_key(database: &State<AppDatabase>) -> Result<Json<&str>, ApiErr> {
+    let api_key = action::generate_api_key(database.get_pool()).await?;
+    println!("Api Key: {}", api_key.to_base64());
+    Ok(Json("Api key generated. See logs for details."))
+}
+
+#[rocket::get("/<shortcode>")]
+pub async fn get_clip(
+    shortcode: &str,
+    database: &State<AppDatabase>,
+    cookies: &CookieJar<'_>,
+    hit_counter: &State<HitCounter>,
+    // NOTE _api_key is not used but it's needed to trigger the request guard
+    _api_key: ApiKey,
+) -> Result<Json<domain::Clip>, ApiErr> {
+    use crate::domain::clip::field::Password;
+
+    // TODO refactor since it's the same as `http.get_raw_clip` mapping logic
+    let req = service::ask::GetClip {
+        shortcode: shortcode.into(),
+        password: cookies
+            .get(PASSWORD_COOKIE)
+            .map(|cookie| cookie.value())
+            .map(|raw_password| Password::new(raw_password.to_string()).ok())
+            .flatten()
+            .unwrap_or_else(Password::default),
+    };
+    let clip = action::get_clip(req, database.get_pool()).await?;
+    hit_counter.hit(shortcode.into(), 1);
+
+    Ok(Json(clip))
+}
+
+#[rocket::post("/", data = "<req>")]
+pub async fn new_clip(
+    req: Json<service::ask::NewClip>,
+    database: &State<AppDatabase>,
+    _api_key: ApiKey,
+) -> Result<Json<domain::Clip>, ApiErr> {
+    let clip = action::new_clip(req.into_inner(), database.get_pool()).await?;
+    Ok(Json(clip))
+}
+
+#[rocket::put("/", data = "<req>")]
+pub async fn update_clip(
+    req: Json<service::ask::UpdateClip>,
+    database: &State<AppDatabase>,
+    _api_key: ApiKey,
+) -> Result<Json<domain::Clip>, ApiErr> {
+    let clip = action::update_clip(req.into_inner(), database.get_pool()).await?;
+    Ok(Json(clip))
+}
+
+pub fn routes() -> Vec<rocket::Route> {
+    rocket::routes!(get_clip, new_clip, update_clip, new_api_key)
+}
+
+pub mod catcher {
+    use rocket::serde::json::Json;
+    use rocket::{catch, catchers, Catcher, Request};
+
+    #[catch(default)]
+    fn default(req: &Request) -> Json<&'static str> {
+        eprintln!("General error: {req:?}");
+        Json("something went wrong...")
+    }
+
+    #[catch(500)]
+    fn internal_error(req: &Request) -> Json<&'static str> {
+        eprintln!("Internal error: {req:?}");
+        Json("internal error")
+    }
+
+    #[catch(404)]
+    fn not_found(_: &Request) -> Json<&'static str> {
+        Json("404")
+    }
+
+    #[catch(401)]
+    fn request_error(_: &Request) -> Json<&'static str> {
+        Json("request error")
+    }
+
+    #[catch(400)]
+    fn missing_api_key(_: &Request) -> Json<&'static str> {
+        Json("API key missing or invalid")
+    }
+
+    pub fn catchers() -> Vec<Catcher> {
+        catchers![
+            not_found,
+            internal_error,
+            request_error,
+            missing_api_key,
+            default
+        ]
     }
 }

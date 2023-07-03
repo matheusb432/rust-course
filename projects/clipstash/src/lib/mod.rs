@@ -8,6 +8,7 @@ pub use data::DataErr;
 pub use domain::clip::field::Shortcode;
 pub use domain::clip::ClipErr;
 pub use domain::time::Time;
+pub use domain::Clip;
 pub use service::ServiceErr;
 
 use data::AppDatabase;
@@ -20,9 +21,10 @@ pub fn rocket(config: RocketConfig) -> Rocket<Build> {
         .manage::<Renderer>(config.renderer)
         .manage::<HitCounter>(config.hit_counter)
         .mount("/", web::http::routes())
-        // ? "static" refers to the /static folder in the root of our crate
-        .mount("/static", FileServer::from("static"))
+        .mount("/api/clip", web::api::routes())
+        .mount("/static", FileServer::from("static")) // ? "static" refers to the /static folder in the root of our crate
         .register("/", web::http::catcher::catchers())
+        .register("/api/clip", web::api::catcher::catchers())
 }
 
 pub struct RocketConfig {
