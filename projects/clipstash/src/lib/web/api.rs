@@ -84,3 +84,43 @@ impl From<ServiceErr> for ApiErr {
         }
     }
 }
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for ApiKey {
+    type Error = ApiErr;
+
+    // NOTE API Request guard
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        fn server_error() -> Outcome<ApiKey, ApiErr> {
+            Outcome::Failure((
+                Status::InternalServerError,
+                ApiErr::Server(Json("server error".to_string())),
+            ))
+        }
+        fn key_error(e: ApiKeyErr) -> Outcome<ApiKey, ApiErr> {
+            Outcome::Failure((Status::BadRequest, ApiErr::Key(Json(e))))
+        }
+        match req.headers().get_one(API_KEY_HEADER) {
+            None => key_error(ApiKeyErr::NotFound("API key not found".to_owned())),
+            Some(key) => {
+                let db = match req.guard::<&State<AppDatabase>>().await {
+                    Outcome::Success(db) => db,
+                    _ => return server_error(),
+                };
+                // TODO refactor to `let else`
+                let api_key = match ApiKey::from_str(key) {
+                    Ok(key) => key,
+                    Err(e) => return key_error(e),
+                };
+
+                match action::api_key_is_valid(api_key.clone(), db.get_pool()).await {
+                    Ok(valid) if valid => Outcome::Success(api_key),
+                    Ok(valid) if !valid => {
+                        key_error(ApiKeyErr::NotFound("API Key not found".to_owned()))
+                    }
+                    _ => server_error(),
+                }
+            }
+        }
+    }
+}
