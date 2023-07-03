@@ -7,6 +7,7 @@ pub mod web;
 pub use data::DataErr;
 pub use domain::clip::field::Shortcode;
 pub use domain::clip::ClipErr;
+use domain::maintenance::Maintenance;
 pub use domain::time::Time;
 pub use domain::Clip;
 pub use service::ServiceErr;
@@ -20,6 +21,7 @@ pub fn rocket(config: RocketConfig) -> Rocket<Build> {
         .manage::<AppDatabase>(config.database)
         .manage::<Renderer>(config.renderer)
         .manage::<HitCounter>(config.hit_counter)
+        .manage::<Maintenance>(config.maintenance)
         .mount("/", web::http::routes())
         .mount("/api/clip", web::api::routes())
         .mount("/static", FileServer::from("static")) // ? "static" refers to the /static folder in the root of our crate
@@ -31,4 +33,12 @@ pub struct RocketConfig {
     pub renderer: Renderer<'static>,
     pub database: AppDatabase,
     pub hit_counter: HitCounter,
+    pub maintenance: Maintenance,
+}
+
+#[cfg(test)]
+pub mod test {
+    pub fn async_runtime() -> tokio::runtime::Runtime {
+        tokio::runtime::Runtime::new().expect("failed to spawn tokio runtime")
+    }
 }
