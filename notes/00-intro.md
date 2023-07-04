@@ -1,10 +1,10 @@
 # Rust 🦀
 
-Rust is a systems programming language that runs blazingly fast, prevents segfaults, and guarantees thread safety.
+Rust is a systems programming language that runs blazingly fast, and enforces memory safety and thread safety to provide a robust foundation for building reliable software.
 
 Rust's goal is to compile programs into efficient binaries that require as few runtime checks as possible. So checks if a program is safe are made at compile-time
 
-A foundational goal of Rust is to ensure that your programs never have undefined behavior. That is the meaning of "safety." Undefined behavior is especially dangerous for low-level programs with direct access to memory. About 70% of reported security vulnerabilities in low-level systems are caused by memory corruption, which is one form of undefined behavior.
+A foundational goal of Rust is to ensure that your programs `never` have undefined behavior. That is the meaning of "safety." Undefined behavior is especially dangerous for low-level programs with direct access to memory. About 70% of reported security vulnerabilities in low-level systems are caused by memory corruption, which is one form of undefined behavior.
 
 Rust doesn't have `null` as it uses the `Option<T>` type, which is much more effective in preventing extremely common bugs.
 

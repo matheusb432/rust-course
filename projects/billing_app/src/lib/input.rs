@@ -1,5 +1,5 @@
-const EXIT: &'static str = "exit";
-const HELP: &'static str = "help";
+const EXIT: &str = "exit";
+const HELP: &str = "help";
 
 use std::io;
 

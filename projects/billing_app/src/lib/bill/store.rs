@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{hash_map::Entry, HashMap};
 
 use super::Bill;
 
@@ -58,44 +58,53 @@ impl BillStore {
     }
 
     pub fn dispatch(&mut self, action: BillAction) {
-        let items = &mut self.items;
+        use BillAction::*;
+
         match action {
-            BillAction::Add(bill) => {
+            Add(bill) => {
                 let key = bill.key();
-                if !items.contains_key(&key) {
-                    items.insert(key, bill);
+                // NOTE Entry::Vacant & Entry::Occupied are enums that represent the state of a HashMap entry
+                // ? They can be used as an alternative to .contains_key() and .get_mut()
+                if let Entry::Vacant(entry) = self.items.entry(key.clone()) {
+                    entry.insert(bill);
                     println!("Successfully added bill!");
                 } else {
                     println!("Bill with key {key:?} already exists!")
                 }
             }
-            BillAction::Edit(key, bill) => {
-                if items.contains_key(&key) {
-                    items.insert(key, bill);
+            Edit(key, bill) => {
+                if let Entry::Occupied(mut entry) = self.items.entry(key.clone()) {
+                    entry.insert(bill);
                     println!("Successfully edited bill!");
                 } else {
                     println!("Bill with key {key:?} does not exist so it can't be edited!")
                 }
             }
-            BillAction::SetPrice(key, price) => {
+            SetPrice(key, price) => {
                 // NOTE get_mut returns a mutable reference in a HashMap by it's key
-                if let Some(old_bill) = items.get_mut(&key) {
+                if let Some(old_bill) = self.items.get_mut(&key) {
                     match old_bill.set_price(price) {
                         Ok(_) => println!("Successfully set a new price!"),
                         Err(err) => println!("Error setting price: {err}"),
                     }
                 }
             }
-            BillAction::Remove(name) => {
+            Remove(name) => {
                 let key = &Bill::create_key(&name);
 
                 // NOTE .is_some() will return true if an item was removed
-                if items.remove(&Bill::create_key(&name)).is_some() {
+                if self.items.remove(&Bill::create_key(&name)).is_some() {
                     println!("Successfully removed bill!");
                 } else {
                     println!("Bill with key {key:?} not found!")
                 }
             }
         }
+    }
+}
+
+impl Default for BillStore {
+    fn default() -> Self {
+        Self::new()
     }
 }

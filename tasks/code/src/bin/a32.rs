@@ -26,9 +26,27 @@ struct Person<'a> {
 struct People<'a> {
     inner: Vec<Person<'a>>,
 }
+
 impl<'a> People<'a> {
     pub fn new(inner: Vec<Person<'a>>) -> Self {
         Self { inner }
+    }
+}
+
+// ? Into impl so that Vec<Person> can be converted into People directly
+impl<'a> Into<People<'a>> for Vec<Person<'a>> {
+    fn into(self) -> People<'a> {
+        People::new(self)
+    }
+}
+
+// ? IntoIterator impl so that People can directly be used in a for..in loop
+impl<'a> IntoIterator for People<'a> {
+    type Item = Person<'a>;
+    type IntoIter = std::vec::IntoIter<Person<'a>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.inner.into_iter()
     }
 }
 
@@ -90,14 +108,14 @@ fn get_indexes(header_row: Option<&str>) -> (Option<usize>, Option<usize>) {
 }
 
 fn main() {
-    // * 1. 2.
-    if let Some(csv_people) = read_people_csv(MOCK_DATA) {
-        let people = People::new(csv_people);
+    // ? 1. 2.
+    let people: People = read_people_csv(MOCK_DATA)
+        .expect("Couldn't parse mock-data.csv!")
+        // ? Using the Into impl to convert Vec<Person> into People
+        .into();
 
-        for person in people.inner {
-            println!("Name: {:?}\tTitle: {:?}", person.name, person.title);
-        }
-    } else {
-        panic!("Couldn't parse mock-data.csv!");
+    // ? Using the IntoIterator impl to iterate over People
+    for person in people {
+        println!("Name: {:?}\tTitle: {:?}", person.name, person.title);
     }
 }

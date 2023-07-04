@@ -69,3 +69,9 @@ impl Bills {
         self.inner.iter().collect()
     }
 }
+
+impl Default for Bills {
+    fn default() -> Self {
+        Self::new()
+    }
+}

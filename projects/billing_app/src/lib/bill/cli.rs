@@ -1,13 +1,13 @@
 pub mod constants {
-    pub const ADD: &'static str = "add";
-    pub const REMOVE: &'static str = "remove";
-    pub const EDIT: &'static str = "edit";
-    pub const SET_PRICE: &'static str = "set_price";
-    pub const LIST: &'static str = "list";
-    pub const BACK: &'static str = "/back";
-    pub const RAW: &'static str = "raw";
+    pub const ADD: &str = "add";
+    pub const REMOVE: &str = "remove";
+    pub const EDIT: &str = "edit";
+    pub const SET_PRICE: &str = "set_price";
+    pub const LIST: &str = "list";
+    pub const BACK: &str = "/back";
+    pub const RAW: &str = "raw";
 
-    pub const GOING_BACK: &'static str = "GOING_BACK";
+    pub const GOING_BACK: &str = "GOING_BACK";
     pub const REMOVE_NAME_PROMPT: &str = "- Enter the bill name to remove:";
     pub const EDIT_NAME_PROMPT: &str = "- Enter the bill name to edit:";
 }
@@ -60,11 +60,11 @@ impl BillCli {
     }
 
     pub fn key_loop(msg: &str) -> Result<String, ()> {
-        Self::bill_input_loop(Self::get_input, Some(msg))
+        Self::bill_input_loop(Self::get_input, msg)
     }
 
     pub fn new_bill_loop(msg: &str) -> Result<Bill, ()> {
-        Self::bill_input_loop(Self::create_bill, Some(msg))
+        Self::bill_input_loop(Self::create_bill, msg)
     }
 
     pub fn list_commands() -> Vec<&'static str> {
@@ -140,12 +140,16 @@ impl BillCli {
         Ok(price)
     }
 
-    fn bill_input_loop<T>(
+    fn bill_input_loop<'a, T, U>(
         handle_input: impl Fn() -> Result<T, String>,
-        maybe_msg: Option<&str>,
-    ) -> Result<T, ()> {
+        msg: U,
+    ) -> Result<T, ()>
+    where
+        U: Into<Option<&'a str>>,
+    {
+        let msg: Option<&'a str> = msg.into();
         loop {
-            if let Some(msg) = maybe_msg {
+            if let Some(msg) = msg {
                 println!("{msg}");
             }
 
