@@ -13,6 +13,8 @@
 //   the `get_data` function.
 // * Use `cargo test --bin m1` to check your work.
 
+#![allow(dead_code)]
+
 use std::error::Error;
 use std::fmt;
 

@@ -255,6 +255,112 @@ let five = demo!(5);
 let hi = demo!("hello");
 ```
 
+### Repetitions
+
+- `Repetitions` are macro transcribers that can be repeated in order to duplicate many lines of code
+- They're declared in the `Matcher` and can be utilized in the `Transcriber`
+- Kinds of repetitions:
+  - `?` - repeat 0 or 1 times
+  - `+` - repeat 1 or more times
+  - `*` - repeat 0 or more times
+
+Matching a repetition:
+
+```rust
+// ? - 0 or 1 times
+macro_rules! demo1 {
+    (
+    // 1. $() begins the repetition
+    // 2. $a:literal is the matcher
+    // 3. , is an optional separator
+    // 4. `?` is the repetition
+        $( $a:literal )?
+    ) => {
+        // Transcribing the repetition, same syntax but without the separator
+
+        $($a)?
+    }
+}
+
+demo1!();
+demo1!(1);
+
+// + - 1 or more times
+macro_rules! demo2 {
+    (
+        $( $a:literal ),+
+    ) => {
+        // Will print the literals passed in
+        $(
+            println("{}", $a);
+        )+
+    }
+}
+
+demo2!(1);
+demo2!(1, 2, 3, 4);
+
+// * - 0 or more times
+macro_rules! demo3 {
+    (
+        $( $a:literal ),*
+    ) => {
+        $(
+            println("{}", $a);
+        )*
+    }
+}
+
+
+
+demo3!(1);
+demo3!(1, 2, 3, 4);
+```
+
+#### Advanced Repetitions
+
+- It's possible to have multiple repetitions in a single matcher:
+
+```rust
+macro_rules! demo {
+    (
+        $( $a:literal ),*
+        // Allows for a trailing comma in the invocation
+        $(,)?
+    ) => {
+        $(
+            println!("{}", $a);
+        )*
+    }
+}
+demo!();
+demo!(1);
+demo!(1, 2, 3, 4,);
+```
+
+- Mixing and matching repetitions:
+
+```rust
+macro_rules! test_many {
+    (
+        // The `:` after ident is part of the syntax
+        $fn: ident:
+        // `->` is part of the syntax
+        $( $in:literal -> $expect:literal ),*
+    ) => {
+        $(
+            // Calls the function with the input and asserts the output
+            assert_eq!($fn($in), $expect);
+        )*
+    }
+}
+fn double(v: i32) -> i32 {
+    v * 2
+}
+// Will run many assertions for the `double` function
+test_many!(double: 0->0, 1->2, 2->4, 3->6, 4->8);
+```
+
 ### Glyphs
 
 - Glyphs are the characters that make up the matcher, they're used to match the input
