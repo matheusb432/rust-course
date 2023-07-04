@@ -48,13 +48,13 @@ impl BillStore {
     pub fn by_name(&self, name: &str) -> Option<&Bill> {
         let items = &self.items;
 
-        items.get(&Bill::create_key(&name))
+        items.get(&Bill::create_key(name))
     }
 
     pub fn exists(&self, name: &str) -> bool {
         let items = &self.items;
 
-        items.contains_key(&Bill::create_key(&name))
+        items.contains_key(&Bill::create_key(name))
     }
 
     pub fn dispatch(&mut self, action: BillAction) {

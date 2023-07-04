@@ -30,7 +30,7 @@ pub fn get_input() -> io::Result<String> {
 
 pub fn input_loop(
     handle_input: impl Fn(&str) -> Result<(), String>,
-    commands: &Vec<&str>,
+    commands: &[&str],
 ) -> Result<(), io::Error> {
     loop {
         println!("Enter a command:");
@@ -47,7 +47,7 @@ pub fn input_loop(
 
 pub fn input_mut_loop(
     mut handle_input: impl FnMut(&str) -> Result<(), String>,
-    commands: &Vec<&str>,
+    commands: &[&str],
 ) -> Result<(), io::Error> {
     loop {
         println!("Enter a command:");
@@ -62,7 +62,7 @@ pub fn input_mut_loop(
     Ok(())
 }
 
-pub fn print_help(commands: &Vec<&str>) {
+pub fn print_help(commands: &[&str]) {
     let commands: String = commands
         .iter()
         .fold("".to_owned(), |acc, curr| format!("- {curr}\n{acc}"));

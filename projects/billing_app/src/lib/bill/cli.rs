@@ -8,6 +8,8 @@ pub mod constants {
     pub const RAW: &'static str = "raw";
 
     pub const GOING_BACK: &'static str = "GOING_BACK";
+    pub const REMOVE_NAME_PROMPT: &str = "- Enter the bill name to remove:";
+    pub const EDIT_NAME_PROMPT: &str = "- Enter the bill name to edit:";
 }
 use constants::*;
 

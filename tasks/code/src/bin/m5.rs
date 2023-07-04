@@ -44,7 +44,7 @@ mod test {
     // ? 1.
     macro_rules! multi_test {
         // * fn_to_test: test_name -> (input, expected)
-        ($fn:ident : $( $name:ident -> $values:expr ),+$(,)?) => {
+        ($fn:ident : $( $name:ident -> $values:expr ),+ $(,)?) => {
             $(
                 #[test]
                 fn $name() {
@@ -53,7 +53,7 @@ mod test {
             )+
         };
         // ? test_name -> (assertion statement)
-        ($( $name:ident -> $assert_stmt:stmt ),+$(,)?) => {
+        ($( $name:ident -> $assert_stmt:stmt ),+ $(,)?) => {
             $(
                 #[test]
                 fn $name() {
@@ -80,6 +80,6 @@ mod test {
 
     // ? Creates a test_all test function that will run the `test_fn!(..) statement
     multi_test!(test_all ->
-        test_fn!(sample_fn -> (10, Small), (60, Medium), (210, Large),),
+        test_fn!(sample_fn -> (10, Small), (60, Medium), (210, Large),)
     );
 }

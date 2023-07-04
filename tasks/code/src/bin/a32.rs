@@ -10,12 +10,12 @@
 // * The mock data has already been loaded with the include_str! macro, so all functionality
 //   must be implemented using references/borrows
 
-use std::collections::HashMap;
+use code::hmap;
 
-const TITLE_KEY: &'static str = "title";
-const NAME_KEY: &'static str = "first_name";
+const TITLE_KEY: &str = "title";
+const NAME_KEY: &str = "first_name";
 
-const MOCK_DATA: &'static str = include_str!("mock-data.csv");
+const MOCK_DATA: &str = include_str!("mock-data.csv");
 
 #[derive(Debug)]
 struct Person<'a> {
@@ -36,7 +36,8 @@ impl<'a> People<'a> {
 fn read_people_csv(csv_data: &'static str) -> Option<Vec<Person<'_>>> {
     let lines: Vec<&str> = csv_data.split('\n').collect();
 
-    let (Some(name_idx), Some(title_idx)) = get_indexes(&lines) else {
+    //  NOTE .copied() is equivalent to .map(|f| *f) for an Option
+    let (Some(name_idx), Some(title_idx)) = get_indexes(lines.first().copied()) else {
         println!("Could not find title or name keys from csv!");
         return None;
     };
@@ -45,7 +46,7 @@ fn read_people_csv(csv_data: &'static str) -> Option<Vec<Person<'_>>> {
     let people = lines[1..lines.len() - 1]
         .iter()
         .map(|line| {
-            line.split(",")
+            line.split(',')
                 .enumerate()
                 .filter(|&(i, _)| i == name_idx || i == title_idx)
                 .map(|(_, s)| s.trim())
@@ -63,25 +64,26 @@ fn read_people_csv(csv_data: &'static str) -> Option<Vec<Person<'_>>> {
 fn get_orders(name_idx: &usize, title_idx: &usize) -> (usize, usize) {
     let mut indexes = vec![name_idx, title_idx];
     indexes.sort();
-    let mut map = HashMap::new();
-    map.insert(indexes[0], 0 as usize);
-    map.insert(indexes[1], 1 as usize);
-    let name_order = *map.get(name_idx).unwrap();
-    let title_order = *map.get(title_idx).unwrap();
+    let map = hmap! { indexes[0] => 0, indexes[1] => 1, };
+    let name_order = *map.get(name_idx).expect("name index not found");
+    let title_order = *map.get(title_idx).expect("title index not found");
 
-    return (name_order, title_order);
+    (name_order, title_order)
 }
 
-fn get_indexes(lines: &Vec<&str>) -> (Option<usize>, Option<usize>) {
+fn get_indexes(header_row: Option<&str>) -> (Option<usize>, Option<usize>) {
     let mut name_idx = None;
     let mut title_idx = None;
-    let header_row = lines.first();
 
-    for (i, prop) in header_row.unwrap().split(",").enumerate() {
+    for (i, prop) in header_row
+        .expect("csv file is empty!")
+        .split(',')
+        .enumerate()
+    {
         match prop.trim() {
             NAME_KEY => name_idx = Some(i),
             TITLE_KEY => title_idx = Some(i),
-            _ => {}
+            _ => (),
         }
     }
     (name_idx, title_idx)
