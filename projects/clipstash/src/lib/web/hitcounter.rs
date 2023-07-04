@@ -3,9 +3,9 @@ use crate::{
     service::{self, ServiceErr},
     Shortcode,
 };
-use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
+use crossbeam_channel::{unbounded, Sender, TryRecvError};
 use parking_lot::Mutex;
-use std::{collections::HashMap, ops::DerefMut, sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::runtime::Handle;
 
 #[derive(Debug, thiserror::Error)]
@@ -36,7 +36,7 @@ impl HitCounter {
     pub fn new(pool: DatabasePool, handle: Handle) -> Self {
         let (tx, rx) = unbounded::<HitCountMsg>();
         let tx_clone = tx.clone();
-        let rx_clone = rx.clone();
+        let rx_clone = rx;
 
         let _ = std::thread::spawn(move || {
             println!("HitCounter thread spawned");
@@ -75,9 +75,6 @@ impl HitCounter {
 
     /// Commit the hits to the database and clears the hit store
     fn commit_hits(hits: HitStore, handle: Handle, pool: DatabasePool) -> ModResult<()> {
-        // ? Desugars to Arc::clone(&hits)
-        let hits = hits.clone();
-
         let hits: Vec<(Shortcode, u32)> = {
             // NOTE `hits` will be dropped at the end of this block, releasing the lock
             let mut hits = hits.lock();
@@ -104,7 +101,7 @@ impl HitCounter {
         pool: DatabasePool,
     ) -> ModResult<()> {
         match msg {
-            HitCountMsg::Commit => Self::commit_hits(hits.clone(), handle.clone(), pool.clone())?,
+            HitCountMsg::Commit => Self::commit_hits(hits, handle, pool)?,
             HitCountMsg::Hit(shortcode, count) => {
                 let mut hitcount = hits.lock();
                 // let hitcount = hitcount.entry(shortcode).or_insert(0);

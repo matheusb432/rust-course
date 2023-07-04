@@ -5,7 +5,7 @@ pub mod hitcounter;
 pub mod http;
 pub mod renderer;
 
-pub const PASSWORD_COOKIE: &'static str = "password";
+pub const PASSWORD_COOKIE: &str = "password";
 
 #[derive(rocket::Responder)]
 pub enum PageErr {

@@ -1,12 +1,14 @@
 use clipstash::{
     domain::clip::field::{Content, Expires, Password, Shortcode, Title},
     service::ask::{GetClip, NewClip, UpdateClip},
-    web::api::{ApiKey, API_KEY_HEADER},
+    web::{
+        api::{ApiKey, API_KEY_HEADER},
+        PASSWORD_COOKIE,
+    },
     Clip,
 };
 use std::error::Error;
 use structopt::StructOpt;
-use strum::EnumString;
 
 #[derive(StructOpt, Debug)]
 enum Command {
@@ -53,14 +55,15 @@ fn get_clip(addr: &str, ask_svc: GetClip, api_key: ApiKey) -> Result<Clip, Box<d
     let addr = format!("{}/api/clip/{}", addr, ask_svc.shortcode.into_inner());
 
     let mut request = client.get(addr);
-    // TODO refactor to some map logic
-    request = match ask_svc.password.into_inner() {
-        // TODO refactor to use `PASSWORD_COOKIE` const
-        Some(password) => request.header(reqwest::header::COOKIE, format!("password={password}")),
-        None => request,
-    };
-    // TODO refactor to fn
-    request = request.header(API_KEY_HEADER, api_key.to_base64());
+
+    if let Some(password) = ask_svc.password.into_inner() {
+        request = request.header(
+            reqwest::header::COOKIE,
+            format!("{PASSWORD_COOKIE}={password}"),
+        );
+    }
+
+    request = add_api_key_header(request, api_key);
     Ok(request.send()?.json()?)
 }
 
@@ -69,8 +72,15 @@ fn new_clip(addr: &str, ask_svc: NewClip, api_key: ApiKey) -> Result<Clip, Box<d
     let addr = format!("{}/api/clip", addr);
 
     let mut request = client.post(addr);
-    request = request.header(API_KEY_HEADER, api_key.to_base64());
+    request = add_api_key_header(request, api_key);
     Ok(request.json(&ask_svc).send()?.json()?)
+}
+
+fn add_api_key_header(
+    request: reqwest::blocking::RequestBuilder,
+    api_key: ApiKey,
+) -> reqwest::blocking::RequestBuilder {
+    request.header(API_KEY_HEADER, api_key.to_base64())
 }
 
 fn update_clip(addr: &str, ask_svc: UpdateClip, api_key: ApiKey) -> Result<Clip, Box<dyn Error>> {
@@ -78,7 +88,7 @@ fn update_clip(addr: &str, ask_svc: UpdateClip, api_key: ApiKey) -> Result<Clip,
     let addr = format!("{}/api/clip", addr);
 
     let mut request = client.put(addr);
-    request = request.header(API_KEY_HEADER, api_key.to_base64());
+    request = add_api_key_header(request, api_key);
     Ok(request.json(&ask_svc).send()?.json()?)
 }
 
@@ -130,7 +140,7 @@ fn run(opt: Opt) -> Result<(), Box<dyn Error>> {
             let original_clip = get_clip(opt.addr.as_str(), svc_req, opt.api_key.clone())?;
 
             let req = UpdateClip {
-                content: Content::new(&clip.as_str())?,
+                content: Content::new(clip.as_str())?,
                 expires: expires.unwrap_or(original_clip.expires),
                 title: title.unwrap_or(original_clip.title),
                 password,

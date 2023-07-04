@@ -1,19 +1,15 @@
 use crate::{
     data::AppDatabase,
-    domain::clip,
     service::{self, action},
-    web::{ctx, form, renderer::RenderErr, PageErr, PASSWORD_COOKIE},
+    web::{ctx, form, PageErr, PASSWORD_COOKIE},
     ServiceErr, Shortcode,
 };
 use rocket::{
-    error::ErrorKind,
     form::{Contextual, Form},
-    http::{Cookie, CookieJar, SameSite, Status},
+    http::{Cookie, CookieJar, Status},
     response::{content::RawHtml, status, Redirect},
     uri, State,
 };
-use serde::Serialize;
-use serde_json::value;
 
 use super::{hitcounter::HitCounter, renderer::Renderer};
 
@@ -80,20 +76,7 @@ pub async fn get_clip(
     hit_counter: &State<HitCounter>,
     renderer: &State<Renderer<'_>>,
 ) -> Result<status::Custom<RawHtml<String>>, PageErr> {
-    // TODO refactor to closure? Type alias for the return?
-    fn render_with_status<T>(
-        status: Status,
-        context: T,
-        renderer: &Renderer,
-    ) -> Result<status::Custom<RawHtml<String>>, PageErr>
-    where
-        T: ctx::PageContext + serde::Serialize + std::fmt::Debug,
-    {
-        Ok(status::Custom(
-            status,
-            RawHtml(renderer.render(context, &[])),
-        ))
-    }
+    let render_with_status = |st, html| Ok(status::Custom(st, RawHtml(html)));
 
     match action::get_clip(shortcode.clone().into(), database.get_pool()).await {
         Ok(clip) => {
@@ -101,15 +84,14 @@ pub async fn get_clip(
             hit_counter.hit(shortcode.clone(), 1);
 
             let context = ctx::ViewClip::new(clip);
-            render_with_status(Status::Ok, context, renderer)
+            render_with_status(Status::Ok, renderer.render(context, &[]))
         }
         Err(e) => match e {
             ServiceErr::PermissionErr(_) => {
                 let context = ctx::PasswordRequired::new(shortcode);
-                render_with_status(Status::Unauthorized, context, renderer)
+                render_with_status(Status::Unauthorized, renderer.render(context, &[]))
             }
-            ServiceErr::NotFound => Err(PageErr::NotFound("clip not found".to_owned())),
-            _ => Err(PageErr::Internal("server error".to_owned())),
+            e => Err(to_page_err(e)),
         },
     }
 }
@@ -139,14 +121,12 @@ pub async fn submit_clip_password(
                 ));
                 Ok(RawHtml(renderer.render(context, &[])))
             }
-            // TODO refactor since it's the same as get_clip error handling
             Err(e) => match e {
                 ServiceErr::PermissionErr(e) => {
                     let context = ctx::PasswordRequired::new(shortcode);
                     Ok(RawHtml(renderer.render(context, &[e.as_str()])))
                 }
-                ServiceErr::NotFound => Err(PageErr::NotFound("clip not found".to_owned())),
-                _ => Err(PageErr::Internal("server error".to_owned())),
+                e => Err(to_page_err(e)),
             },
         }
     } else {
@@ -165,16 +145,7 @@ pub async fn get_raw_clip(
     hit_counter: &State<HitCounter>,
     database: &State<AppDatabase>,
 ) -> Result<status::Custom<String>, Status> {
-    use crate::domain::clip::field::Password;
-    let req = service::ask::GetClip {
-        shortcode: shortcode.clone(),
-        password: cookies
-            .get(PASSWORD_COOKIE)
-            .map(|cookie| cookie.value())
-            .map(|raw_password| Password::new(raw_password.to_string()).ok())
-            .flatten()
-            .unwrap_or_else(Password::default),
-    };
+    let req = service::ask::GetClip::from_cookies(shortcode.clone(), cookies);
     match action::get_clip(req, database.get_pool()).await {
         Ok(clip) => {
             hit_counter.hit(shortcode.clone(), 1);
@@ -214,6 +185,13 @@ pub mod catcher {
 
     pub fn catchers() -> Vec<Catcher> {
         catchers![not_found, internal_error, default]
+    }
+}
+
+fn to_page_err(err: ServiceErr) -> PageErr {
+    match err {
+        ServiceErr::NotFound => PageErr::NotFound("clip not found".to_owned()),
+        _ => PageErr::Internal("server error".to_owned()),
     }
 }
 

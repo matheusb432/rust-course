@@ -56,7 +56,6 @@ impl<'a> Renderer<'a> {
     }
 
     fn get_base_value<P>(context: &P, errors: &[&str]) -> Option<serde_json::Value>
-    // TODO type alias for P?
     where
         P: ctx::PageContext + serde::Serialize + std::fmt::Debug,
     {

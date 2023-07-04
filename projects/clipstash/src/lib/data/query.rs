@@ -105,7 +105,7 @@ pub async fn update_clip<M: Into<model::UpdateClip>>(
 pub async fn save_api_key(api_key: ApiKey, pool: &DatabasePool) -> ModResult<ApiKey> {
     let bytes = api_key.clone().into_inner();
     // ? Inserting the api key's raw bytes into the database
-    let _ = sqlx::query!(r#"INSERT INTO api_keys (api_key) VALUES (?)"#, bytes)
+    sqlx::query!(r#"INSERT INTO api_keys (api_key) VALUES (?)"#, bytes)
         .execute(pool)
         .await
         .map(|_| ())?;
@@ -184,11 +184,11 @@ pub mod test {
         let db = new_db(rt.handle());
         let pool = db.get_pool();
 
-        let clip = rt.block_on(async move { super::new_clip(model_new_clip("1"), &pool).await });
+        let clip = rt.block_on(async move { super::new_clip(model_new_clip("1"), pool).await });
 
         assert!(clip.is_ok());
         let clip = clip.unwrap();
         assert!(clip.shortcode == "1");
-        assert!(clip.content == format!("content for clip '1'"));
+        assert!(clip.content == *"content for clip '1'");
     }
 }

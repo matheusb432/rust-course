@@ -1,6 +1,8 @@
-use crate::domain::clip::field;
+use crate::domain::clip::field::Password;
 use crate::Shortcode;
+use crate::{domain::clip::field, web::PASSWORD_COOKIE};
 
+use rocket::http::CookieJar;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -15,6 +17,18 @@ impl GetClip {
             // ? Equivalent to -> Shortcode::from(shortcode),
             shortcode: shortcode.into(),
             password: field::Password::default(),
+        }
+    }
+
+    pub fn from_cookies<T: Into<Shortcode>>(shortcode: T, cookies: &CookieJar<'_>) -> Self {
+        Self {
+            shortcode: shortcode.into(),
+            password: cookies
+                .get(PASSWORD_COOKIE)
+                .map(|cookie| cookie.value())
+                // NOTE `and_then` is more concise then `map(expr).flatten()`
+                .and_then(|raw_password| Password::new(raw_password.to_string()).ok())
+                .unwrap_or_default(),
         }
     }
 }

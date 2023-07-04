@@ -1,6 +1,6 @@
 use clipstash::{
     data::AppDatabase,
-    domain::{clip, maintenance::Maintenance},
+    domain::{maintenance::Maintenance},
     web::{hitcounter::HitCounter, renderer::Renderer},
 };
 use dotenv::dotenv;
@@ -28,7 +28,7 @@ fn main() {
     let database = rt.block_on(async move { AppDatabase::new(&opt.connection_string).await });
     // NOTE This will manage the hit counter state in a separate thread, deferring database writes
     let hit_counter = HitCounter::new(database.get_pool().clone(), handle.clone());
-    let maintenance = Maintenance::spawn(database.get_pool().clone(), handle.clone());
+    let maintenance = Maintenance::spawn(database.get_pool().clone(), handle);
 
     let config = clipstash::RocketConfig {
         renderer,
