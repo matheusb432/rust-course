@@ -274,4 +274,4 @@ demo![W 0 W!_ any | thing?yes.#meta (/./)];
   - `use ::std::collections::HashMap`
 - When using modules from the current crate, use `$crate`:
   - `$crate::my_module::my_function()`
-- This helps resolve import issues since macros can be invoked from any location
+- This helps resolve import issues since macros can be invoked from any location, so absolute paths are preferred
