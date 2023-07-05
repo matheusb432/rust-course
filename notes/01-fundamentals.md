@@ -1,72 +1,76 @@
 # Rust Fundamentals 🦀
 
-Rust is an expression-based language, this means that most things are evaluated and return some value, anything that doesn't return a value is a statement.
+- Rust is an expression-based language, this means that most things are evaluated and return some value, anything that doesn't return a value is a statement.
 
 ```rust
-// `let x` is a statement, `5 + 5` is an expression
+// `let x` is a statement & `5 + 5` is an expression
 let x = 5 + 5;
 ```
 
-In general, writing Rust functions is a careful balance of asking for the right level of permission.
-
 ## Variables
 
-Variables are a way to assign data to a temporary memory location.
+- Variables are a way to assign data to a temporary memory location.
+- By default, variables are immutable. To make a variable mutable, use the `mut` keyword.
 
 ```rust
 let price = 30;
-let city = "NYC";
-```
-
-By default, variables are immutable. To make a variable mutable, use the `mut` keyword.
-
-```rust
 let mut discount_price = 49.99;
-let mut name = "John";
 ```
 
 ### Constants
 
-Constants are similar to variables, but they are immutable and must be annotated with a type, they must also have a value that can be computed at compile time.
+- Constants are similar to variables, but they are immutable and must be annotated with a type, they must also have a value that can be computed at compile time.
+- Constants are more performant than variables because they are inlined wherever they are used.
 
 ```rust
 const MAX_POINTS: u32 = 100_000;
+// Lifetime will elide to `&'static str`
+const COOKIE_NAME: &str = "auth_token";
 
-fn main() {
-    println!("The value of MAX_POINTS is: {}", MAX_POINTS);
-}
+println!("The cookie name is: {}", COOKIE_NAME);
+println!("The value of MAX_POINTS is: {}", MAX_POINTS);
 ```
-
-Constants are more performant than variables because they are inlined wherever they are used.
 
 ### Shadowing
 
-Shadowing lets us transform a variable in a way that is clear, type-safe, and performant. It also helps keep our code concise and self-documenting, reducing the mental overhead of tracking multiple variable names.
+- Shadowing lets us transform a variable in a way that is clear, type-safe, and performant. It also helps keep our code concise and self-documenting, reducing the mental overhead of tracking multiple variable names.
 
 ```rust
 let spaces = " "; // spaces is a string
 let spaces = spaces.len(); // now spaces is an integer, the length of the original string
 ```
 
+- Another benefit of shadowing is `temporary mutability`, we can make a variable mutable only for the necessary parts of our code.
+
+```rust
+let mut age = 30;
+age = 42;
+let age = age; // age => 42
+
+// This can also be done with a scope
+let age = {
+    let mut age = 30;
+    age = 42;
+    age // => 42
+};
+```
+
 ## Functions
 
-In Rust, returns are implicit. The last expression in a function is the return value.
-
-The type of the return value is defined with `->`
+- In Rust, returns are implicit. The last expression in a function is the return value.
+- Writing Rust functions is a careful balance of asking for the right level of permission, meaning that not every functions needs to take ownership or mutate data.
 
 ```rust
 fn add(x: i32, y: i32) -> i32 {
     x + y
 }
-
 let res = add(5, 10); // 15
 ```
 
 ## Expressions
 
-Expression values coalesce to a single point, they can be used for nesting logic
-
-It's also possible to nest expressions, but it should be limited to 2 or 3 levels of nesting so the code doesn't become too complex
+- Expression values coalesce to a single point, this enables variables to be set to the result of an expression.
+- It's also possible to nest expressions, but it should be limited to 2 or 3 levels of nesting so the code doesn't become too complex
 
 ```rust
 let my_num = 3;
@@ -76,65 +80,31 @@ let is_lt_5 = if my_num < 5 {
 } else {
     false
 };
-
 // Equivalent since the ternary expression would be redundant
 let is_lt_5 = my_num < 5;
-
-// Possible to set message to the result of the match expression
-let message = match my_num {
-    1 => "hello",
-    _ => "goodbye",
-}
 ```
 
 ## Closure
 
-A closure is simply an anonymous function. It can be stored in a variable, passed as an argument to a function, or returned from a function.
+- A closure is simply an anonymous function. It can be stored in a variable, passed as an argument to a function, or returned from a function.
 
 ```rust
-
 // A closure that takes no arguments and returns nothing
 let say_hello = || println!("Hello!");
-
 // A closure that takes two arguments and returns the sum of them
 let sum = |a, b| -> i32 { a + b };
 ```
 
 ## Macros
 
-In Rust, a macro is a way of defining reusable chunks of code. Macros in Rust are a bit similar to functions, but instead of generating a value, macros generate code snippets.
+- In Rust, a macro is a way of defining reusable chunks of code. Macros in Rust are a bit similar to functions, but instead of generating a value, macros generate code snippets.
 
 ```rust
 let life = 42;
+// Invoking the println! macro
 println!("hello"); // hello
-// The `:?` is for debugging purposes
 println!("{:?}", life); // 42
-println!("{life:?}"); // 42
-// Without the `:?` it can be used for end users
-println!("For end user: {life}"); // 42
-println!("The meaning of {:?} is {:?}", life, life); // The meaning of 42 is 42
 ```
-
-Creating a macro
-
-```rust
-macro_rules! say_hello {
-    () => (
-        // println! is also a macro
-        println!("Hi!");
-    )
-}
-
-...
-
-say_hello!() // Output: "Hi!"
-```
-
-One of the main advantages of macros over functions in Rust is that they are more flexible and can accept a varying number of arguments, among other things.
-
-Macros work through a process called macro expansion, where the macro is expanded to its body code before the code is compiled.
-
-Macros can also be more difficult to write and debug than functions, so they should be used judiciously.
 
 ## Control Flow
 
@@ -195,13 +165,11 @@ println!("The result is {result}"); // "The result is 20"
 
 ### Match expressions
 
-Match expressions are a much more powerful switch statemen
-
-Match expressions must be exhaustive, they should account for every possible result, so if a match is used for controlling an action on an enum value, the compiler throw an error if that is not accounted for
+- Match expressions are a much more powerful switch statement
+- Match expressions must be exhaustive, they should account for every possible result, so if a match is used for controlling an action on an enum value, the compiler throw an error if that is not accounted for
 
 ```rust
 let some_bool = true;
-
 match some_bool {
     true => println!("Is true"),
     false => println!("Is false"),
@@ -212,14 +180,14 @@ match some_int {
     1 => println!("Is one"),
     2 => println!("Is two"),
     3 => println!("Is three"),
-    // NOTE _ is the default case
+    // _ is the default case
     _ => println!("Is something else"),
 }
 ```
 
 ## Modules
 
-Modules are a way to organize code and control the privacy of paths. A module is a collection of items: functions, structs, traits, impl blocks, and even other modules.
+- Modules are a way to organize code and control the privacy of paths. A module is a collection of items: functions, structs, traits, impl blocks, and even other modules.
 
 ```rust
 mod my_module {
@@ -237,7 +205,7 @@ mod my_module {
 
 ### Crates
 
-A crate can come in one of two forms: a binary crate or a library crate. A binary crate is an executable, and a library crate is a collection of code that can be imported into other crates.
+- A crate can come in one of two forms: a binary crate or a library crate. A binary crate is an executable, and a library crate is a collection of code that can be imported into other crates.
 
 ## Overloading traits
 

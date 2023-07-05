@@ -20,7 +20,12 @@
   - The input patterns are different than patterns used in `match` or `if let`
   - Multiple matchers may be defined for one macro, they're checked in order
 - `Transcribers` read the input captured by the matchers and then emit code
+
   - The transcribed code completely replaces the macro invocation
+
+- One of the main advantages of macros over functions in Rust is that they are more flexible and can accept a varying number of arguments, among other things.
+- Macros work through a process called macro expansion, where the macro is expanded to its body code before the code is compiled.
+- Macros can also be more difficult to write and debug than functions, so they should be used judiciously.
 
 ## Matchers
 
@@ -42,7 +47,7 @@ $varname
 
 - Fragment specifies determine what kind of data is allowed in a metavariable
 - Some of the available specifiers are: `item`, `block`, `stmt`, `pat`, `expr`, `ty`, `ident`, `path`, `tt`, `literal`, `vis`, `lifetime`, `meta`
-- Some specifies have restrictions on what can follow to prevent ambiguity
+- Some specifiers have restrictions on what symbols can follow to prevent ambiguity
   - Specifiers with restrictions are: `expr`, `stmt`, `ty`, `pat`, `path`, `vis`
 
 #### `item`
@@ -78,7 +83,6 @@ demo! {
 macro_rules! demo {
     ($b:block) => { $b };
 }
-
 let num = demo!({ if 1 == 1 { 1 + 1 } else { 2 } });
 ```
 
@@ -112,7 +116,6 @@ macro_rules! demo {
         }
     }};
 }
-
 demo!( 2 );
 ```
 

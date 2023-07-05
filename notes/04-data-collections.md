@@ -4,7 +4,8 @@
 
 ## Iterators
 
-Iterators are lazy and do nothing unless consumed for performance reasons, so using collect() is necessary to run them.
+- Iterators are one of Rust's _zero-cost abstractions_, they can sometimes even be faster than imperative code.
+- Iterators are 'lazy' for performance reasons, so using collect() is necessary to run them.
 
 ```rust
 let numbers = vec![1, 2, 3, 4, 5];
@@ -13,9 +14,9 @@ let numbers = vec![1, 2, 3, 4, 5];
 let plus_one: Vec<i32> = numbers.iter().map(|num| num + 1).collect();
 ```
 
-### iter() and into_iter()
+### `iter()` and `into_iter()`
 
-iter() borrows each element of the collection through each iteration, and into_iter() consumes the collection so that each iteration owns the element.
+- `iter()` borrows each element of the collection through each iteration, and `into_iter()` consumes the collection so that each iteration owns the element.
 
 ```rust
 let numbers = vec![1, 2, 3, 4, 5];
@@ -33,10 +34,11 @@ for num in numbers.into_iter() {
 
 ## Vector
 
-Vectors allow you to store dynamic, mutable lists of data. Vectors can only store values of the same type.
+- Vectors allow you to store dynamic, mutable lists of data.
+- Vectors can only store values of the same type.
 
 ```rust
-// The vec! macro expands to something similar to creating the vector and pushing the values into it
+// The vec! macro expands to creating the vector and pushing the values into it
 let my_numbers = vec![1, 2, 3];
 
 let mut my_numbers = Vec::new();
@@ -55,11 +57,10 @@ for num in my_numbers {
 }
 ```
 
-## String and &str
+## `String` and `&str`
 
-String is the owned data type, and &str is a string slice.
-
-Must use an owned String to store it in a struct, and it's more efficient to pass &str as a function parameter.
+- `String` is the owned data type, and `&str` is a string slice.
+- It's more efficient to pass `&str` as a function parameter so that no data is copied.
 
 ```rust
 fn print_it(input: &str) {
@@ -81,31 +82,24 @@ fn main() {
 
 ## Tuples
 
-A type of record to store data anonymously (unnamed fields) that can be easily destructured into variables
-
-Ideally tuples should have at most 3 values, if more values than that are needed, structs should be used instead
-
-Useful to return pairs of data from functions
+- A tuple is a record to store data anonymously (unnamed fields) that can be easily destructured into variables
+- Ideally tuples should have at most 3 values, structs should be used for more values
 
 ```rust
 enum Access {
     Full,
 }
+let (employee, access) = ("John", Access::Full);
 
 fn one_two_three() -> (i32, i32, i32) {
     (1, 2, 3)
 }
-
 let numbers = one_two_three();
-println!("numbers -> {:?}", numbers);
-let (employee, access) = ("John", Access::Full);
 ```
 
 ## Enums
 
-Enums are not limited to just plain variants, each variant can optionally contain additional data
-
-The additional data is required to create variants on enums that specify a type.
+- Enums are a type that can have a fixed set of variants, each variant can optionally contain additional data.
 
 ```rust
 enum Mouse {
@@ -118,12 +112,10 @@ enum Mouse {
     Move(i32, i32),
 }
 
-
 enum PromoDiscount {
     NewUser,
     Holiday(String),
 }
-
 enum Discount {
     Percent(i32),
     Flat(i32),
@@ -135,9 +127,7 @@ enum Discount {
 
 ## HashMap
 
-A HashMap is a collection that stores key-value pairs, where the key is used to look up the value in an efficient manner.
-
-Similar to a Map in JS.
+- A HashMap is a collection that stores key-value pairs (KVPs), where the key is used to look up the value in an efficient manner. It's similar to a Map in JS.
 
 ```rust
 let mut people = HashMap::new();
@@ -147,23 +137,19 @@ people.insert("Mark", 40);
 people.insert("Mark", 50); // Overwrites the previous value
 people.remove("Becky");
 
-// Matching on the Result<T> of the get method
+// The get() method returns an Option<T>
 match people.get("John") {
     Some(age) => println!("John's age: {}", age),
     None => println!("John not found"),
 }
 
-// .iter() return a key-value tuple on HashMaps
+// .iter() return a KVP tuple on HashMaps, keys() and values() return iterators
 for (person, age) in people.iter() {
     println!("{} is {} years old", person, age);
 }
-
-// .keys() returns an iterator of the keys
 for person in people.keys() {
     println!("Person: {}", person);
 }
-
-// .values() returns an iterator of the values
 for age in people.values() {
     println!("Age: {}", age);
 }
@@ -171,27 +157,22 @@ for age in people.values() {
 
 ## Arrays & Slices
 
-Arrays are a fixed sized memory region that stores values of the same type. Arrays are allocated on the stack. They're useful when working with a fixed buffer size.
+- Arrays are a fixed sized memory region that stores values of the same type. Arrays are allocated on the stack. They're useful when working with a fixed buffer size.
+
+- A slice is a borrowed view into an array, they can be iterated upon and are optionally mutable.
+- Slices can be obtained from any data structure that's backed by an array, such as vectors.
 
 ```rust
-let numbers: [u8; 3] = [1, 2, 3];
+let numbers: [u8; 5] = [1, 2, 3, 4, 5];
 
 // Functions signature types
-fn func(arr: [u8; 3]) {}
+fn func(arr: [u8; 5]) {}
 fn func(arr: &[u8]) {}
 fn func(arr: &mut [u8]) {}
-```
-
-A slice is a borrowed view into an array, they can be iterated upon and are optionally mutable.
-
-Slices can be obtained from any data structure that's backed by an array, such as vectors.
-
-```rust
-let numbers: [u8; 3] = [1, 2, 3, 4, 5];
 
 let slice: &[u8] = &numbers;
 
-// Slicing a specific range of values
+// Slicing a specific range of values by index
 let from_one_through_two: &[u8] = &numbers[1..=2];
 let from_zero_through_two: &[u8] = &numbers[..3];
 
@@ -207,12 +188,12 @@ match chars.as_slice() {
 
 match chars.as_slice() {
     [first, ..] => (),
-    // ! This match arm will never match, slice patterns easily overlap
+    // ! This match arm will NEVER match, slice patterns easily overlap
     [.., second] => (),
     [] => (),
 }
 
-// This works, matching on larger patterns first
+// This works, match on larger patterns first
 match chars.as_slice() {
     // Will only match if the slice as 3 or more elements, then 2 or more and so on
     [first, second, third, ..] => (),
@@ -233,7 +214,7 @@ match chars.as_slice() {
 }
 ```
 
-Borrowing a Vector as an argument to a function that requires a slice will automatically obtain a slice, in general it should be preferred to borrow a slice instead of a vector.
+- Borrowing a Vector as an argument to a function that requires a slice will automatically obtain a a slice of the entire collection, in general it should be preferred to borrow a slice instead of a vector.
 
 ```rust
 fn func(slice: &[u8]) {}

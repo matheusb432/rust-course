@@ -1,32 +1,25 @@
 # Memory in Rust 🦀
 
-All programs must track their memory usage. This is done by allocating and freeing memory. If they fail to do so, a memory leak occurs. This is a serious problem, as it can cause the program or even the entire system to crash.
-
-To transfer access to data without copying it, Rust uses pointers. A pointer is a value that describes a location in memory.
-
-Rust follows the Pointer Safety Principle; data should never be aliased and mutated at the same time. This is enforced at compile time.
+- All programs must track their memory usage. This is done by allocating and freeing memory. If they fail to do so, a memory leak occurs. This is a serious problem, as it can cause a program or even an entire system to crash.
+- To transfer access to data without copying it, Rust uses pointers. A pointer is a value that describes a location in memory.
+- Rust follows the `Pointer Safety Principle`; data should never be aliased and mutated at the same time. This is enforced at compile time.
 
 ## Variables
 
-Variables live in the stack in memory, they're stored in frames. A frame is a mapping from variables to values within a single scope, such as a function.
-
-Frames are organized into a stack of currently-called-functions. After a function returns, Rust deallocates the function's frame. This sequence of frames is called a stack because the most recent frame added is always the next frame freed.
+- Variables live in the stack in memory, they're stored in _frames_. A _frame_ is a mapping from variables to values within a single scope, such as a function.
+- Frames are organized into a stack of currently-called-functions. After a function returns, Rust deallocates the function's frame. This sequence of frames is called a stack because the most recent frame added is always the next frame freed.
 
 ## Ownership
 
-Rust utilizes an "ownership" model to manage memory. This means that every value has a single owner, and that owner is responsible for cleaning up the memory.
-
-Ownership is a core feature in Rust that ensures memory safety without the need for a garbage collector.
-
-Ownership is used to keep programs running fast and free from memory leaks. It's much more efficient to borrow data than it is to copy it.
-
-Each value in Rust has a variable that is its owner. The scope in which the variable is declared is where it is valid or accessible. Once the variable goes out of scope, Rust automatically calls the drop function and the memory is freed.
-
-In Rust, memory can either be "moved" or "borrowed".
+- Rust utilizes an _ownership_ model to manage memory. This means that every value has a single owner, and that owner is responsible for cleaning up the memory.
+- _Ownership_ is a core feature in Rust that ensures memory safety without the need for a garbage collector.
+- _Ownership_ is used to keep programs running fast and free from memory leaks. It's much more efficient to borrow data than it is to copy it.
+- Each value in Rust has a variable that is its owner. The scope in which the variable is declared is where it is valid or accessible. Once the variable goes out of scope, Rust automatically calls the drop function and the memory is freed.
+- In Rust, memory can either be _moved_ or _borrowed_.
 
 ### Moving memory
 
-When a value is moved, the ownership is transferred to the new owner. the new owner is now responsible for deleting the data
+- When a value is _moved_, the ownership is transferred to the new owner. the new owner is now responsible for deleting the data
 
 ```rust
 enum Light {
@@ -52,7 +45,10 @@ display_light(dull);
 
 ### Borrowing memory
 
-When a value is borrowed, the ownership is not transferred, but the borrower is allowed to use the value for a limited time, and it will not take responsibility for deleting the data.
+- When a value is _borrowed_, the ownership is not transferred, but the borrower is allowed to use the value for a limited time, and it will not take responsibility for deleting the data.
+- Creating a reference to mutable data ("borrowing" it) causes that data to be temporarily read-only until the reference is no longer used. This ensures that mutable references are memory safe.
+- Mutable references are also called "unique references"
+- As a part of the _Pointer Safety Principle_, the borrow checker enforces that data must outlive any references to it.
 
 ```rust
 enum Light {
@@ -75,15 +71,9 @@ display_light(&dull);
 display_light(&dull);
 ```
 
-Creating a reference to mutable data ("borrowing" it) causes that data to be temporarily read-only until the reference is no longer used. This ensures that mutable references are memory safe.
-
-Mutable references are also called "unique references"
-
-As a part of the Pointer Safety Principle, the borrow checker enforces that data must outlive any references to it.
-
 ## The Stack and the Heap
 
-In Rust, data is stored in memory in two principal areas: the stack and the heap.
+- Data is stored in memory in two principal areas: the stack and the heap.
 
 ### Stack
 
@@ -118,7 +108,7 @@ let data_stack = *data_ptr;
 - Lifetimes are a way to ensure that references are valid as long as the data they refer to is valid.
 - They're needed to store borrowed data in structs or enums, and to return borrowed data from functions.
 - All data has a lifetime, but the compiler can often infer the lifetime of data, so most times it's unnecessary to explicitly annotate lifetimes.
-- Lifetimes are a form of generics, by convention they're named with 'a, 'b, 'c, etc.
+- Lifetimes are a form of generics, by convention they're named with `'a, 'b, 'c`.
 
   - 'static data lives for the entire duration of the program
 
@@ -131,7 +121,6 @@ let data_stack = *data_ptr;
   - Always be destroyed _before_ the owner is destroyed
 
 ```rust
-// Syntax
 fn name<'a>(arg: &'a DataType) -> &'a DataType {}
 
 enum Part {
@@ -178,9 +167,12 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 
 ### Lifetime Elision
 
-- Rust has a set of rules for implicit lifetime annotations that are known as the lifetime elision rules. These aren't rules for programmers to follow; they're a set of particular cases that the compiler will consider, and if your code fits these cases, you don't need to write the lifetimes explicitly.
+- Rust has a set of rules for implicit lifetime annotations that are known as the _lifetime elision rules_. These aren't rules for programmers to follow; they're a set of particular cases that the compiler will consider, and if your code fits these cases, you don't need to write the lifetimes explicitly.
 
-- The compiler uses three rules to figure out what lifetimes references have when there aren't explicit annotations. The first rule applies to input lifetimes, and the second and third rules apply to output lifetimes. If the compiler gets to the end of the three rules and there are still references for which it can't figure out lifetimes, the compiler will stop with an error.
-  - The first rule is that each parameter that is a reference gets its own lifetime parameter. In other words, a function with one parameter gets one lifetime parameter: fn foo<'a>(x: &'a i32); a function with two parameters gets two separate lifetime parameters: fn foo<'a, 'b>(x: &'a i32, y: &'b i32); and so on.
-  - The second rule is if there is exactly one input lifetime parameter, that lifetime is assigned to all output lifetime parameters: fn foo<'a>(x: &'a i32) -> &'a i32.
-  - The third rule is if there are multiple input lifetime parameters, but one of them is &self or &mut self because this is a method, the lifetime of self is assigned to all output lifetime parameters. This third rule makes methods much nicer to read and write because fewer symbols are necessary.
+- The compiler uses _three rules_ to figure out what lifetimes references have when there aren't explicit annotations. If the compiler gets to the end of the three rules and there are still references for which it can't figure out lifetimes, the compiler will stop with an error.
+
+  1. Each parameter that is a reference gets its own lifetime parameter. In other words, a function with one parameter gets one lifetime parameter: `fn foo<'a>(x: &'a i32);` a function with two parameters gets two separate lifetime parameters: `fn foo<'a, 'b>(x: &'a i32, y: &'b i32);` and so on.
+
+  2. If there is exactly one input lifetime parameter, that lifetime is assigned to all output lifetime parameters: `fn foo<'a>(x: &'a i32) -> &'a i32`.
+
+  3. If there are multiple input lifetime parameters, but one of them is `&self` or `&mut self`, the lifetime of `self` is assigned to all output lifetime parameters. This third rule makes methods much nicer to read and write because fewer symbols are necessary.

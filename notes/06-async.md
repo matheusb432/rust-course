@@ -2,7 +2,7 @@
 
 - Async code can wait on a large amount of futures at the same time, without blocking the thread.
 - Async code only ever executes serially, on a single thread.
-- Async waits on a `Future` to complete, and then continue executing.
+- Async waits on a `Future` to complete, and then continues executing.
 - Async code is non-blocking, meaning that it doesn't block the thread while waiting for a `Future` to complete.
 
 ## Futures
