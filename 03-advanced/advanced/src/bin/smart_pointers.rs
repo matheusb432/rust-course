@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{borrow::Cow, cell::RefCell, rc::Rc, sync::Arc};
 
 #[derive(Debug)]
 enum MenuItem {
@@ -58,4 +58,11 @@ fn main() {
 
     // ? Will still be able to access the data since the smart pointer is still alive (has at least one reference)
     dbg!(accounting.0.borrow());
+
+    // NOTE Memory in bytes of some smart pointers constructs compared to a string slice
+    dbg!(std::mem::size_of::<&str>());
+    dbg!(std::mem::size_of::<String>());
+    dbg!(std::mem::size_of::<Box<str>>());
+    dbg!(std::mem::size_of::<Arc<str>>());
+    dbg!(std::mem::size_of::<Cow<'_, str>>());
 }
